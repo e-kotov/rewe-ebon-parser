@@ -1,3 +1,4 @@
+# cli.py
 import sys
 from pathlib import Path
 from .output import process_pdf, process_folder

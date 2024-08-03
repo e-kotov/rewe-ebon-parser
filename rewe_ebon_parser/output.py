@@ -1,8 +1,9 @@
+# output.py
 import json
 import time
 import csv
 from pathlib import Path
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from tqdm import tqdm
 from .parse import extract_raw_text, parse_ebon
 
@@ -11,23 +12,27 @@ def process_pdf(pdf_path, output_path=None, rawtext_file=False, rawtext_stdout=F
     if output_path:
         output_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure the output directory exists
 
-    with open(pdf_path, 'rb') as f:
-        data = f.read()
+    try:
+        with open(pdf_path, 'rb') as f:
+            data = f.read()
 
-        if rawtext_file or rawtext_stdout:
-            raw_text = extract_raw_text(data)
-            if rawtext_file:
-                rawtext_path = output_path.with_suffix('.txt') if output_path else pdf_path.with_suffix('.txt')
-                rawtext_path.write_text(raw_text, encoding='utf-8')
-            if rawtext_stdout:
-                print(raw_text)
-            return
-        
-        result = parse_ebon(data)
+            if rawtext_file or rawtext_stdout:
+                raw_text = extract_raw_text(data)
+                if rawtext_file:
+                    rawtext_path = output_path.with_suffix('.txt') if output_path else pdf_path.with_suffix('.txt')
+                    rawtext_path.write_text(raw_text, encoding='utf-8')
+                if rawtext_stdout:
+                    print(raw_text)
+                return
 
-        if result and output_path:
-            with open(output_path, 'w', encoding='utf-8') as json_file:
-                json.dump(result, json_file, default=str, indent=2, ensure_ascii=False)
+            result = parse_ebon(data)
+
+            if result and output_path:
+                with open(output_path, 'w', encoding='utf-8') as json_file:
+                    json.dump(result, json_file, default=str, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"Failed to process {pdf_path}: {e}")
+        raise
 
 def process_folder(input_folder, output_folder=None, max_workers=None, rawtext_file=False, rawtext_stdout=False):
     if output_folder:
@@ -41,7 +46,7 @@ def process_folder(input_folder, output_folder=None, max_workers=None, rawtext_f
     pdf_files = list(input_folder.glob("*.pdf"))
     total_files = len(pdf_files)
 
-    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
         futures = {}
         for pdf_file in pdf_files:
             output_file = (output_folder / (pdf_file.stem + ".json")) if output_folder else None
@@ -75,3 +80,4 @@ def process_folder(input_folder, output_folder=None, max_workers=None, rawtext_f
             log_writer = csv.writer(csvfile)
             log_writer.writerow(["File Name", "Status", "Error Message"])
             log_writer.writerows(log_entries)
+
