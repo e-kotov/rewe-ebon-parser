@@ -1,4 +1,5 @@
 # src/rewe_ebon_parser/parse.py
+
 import re
 from datetime import datetime
 from typing import List, Optional
@@ -10,6 +11,15 @@ from collections import OrderedDict
 from .classes import *
 
 def extract_raw_text(data_buffer: bytes) -> str:
+    """
+    Extract raw text from a PDF data buffer.
+
+    Args:
+        data_buffer (bytes): The PDF data buffer.
+
+    Returns:
+        str: The extracted raw text.
+    """
     raw_text = ''
     with pdfplumber.open(io.BytesIO(data_buffer)) as pdf:
         for page in pdf.pages:
@@ -17,6 +27,15 @@ def extract_raw_text(data_buffer: bytes) -> str:
     return raw_text
 
 def parse_ebon(data_buffer: bytes) -> dict:
+    """
+    Parse receipt data from a PDF data buffer.
+
+    Args:
+        data_buffer (bytes): The PDF data buffer.
+
+    Returns:
+        dict: The parsed receipt data.
+    """
     data_text = extract_raw_text(data_buffer)
 
     lines = list(filter(None, map(str.strip, data_text.replace('  ', ' ').split('\n'))))
@@ -43,17 +62,24 @@ def parse_ebon(data_buffer: bytes) -> dict:
     tax_details_A = None
     tax_details_B = None
 
-    # Improved address extraction logic
-    address_match = re.search(r'[\s\*]*([a-zäöüß \d.,-]+?)\s*[\s\*]*(\d{5})\s*([a-zäöüß \d.,-]+)[\s\*]*', data_text, re.IGNORECASE)
-    if address_match:
+    # Improved address extraction logic to handle both formats
+    address_match_1 = re.search(r'[\s\*]*([a-zäöüß \d.,-]+?)\s*[\s\*]*(\d{5})\s*([a-zäöüß \d.,-]+)[\s\*]*', data_text, re.IGNORECASE)
+    address_match_2 = re.search(r'([\wäöüß \d.,-]+),\s*(\d{5})\s*([\wäöüß \d.,-]+)', data_text, re.IGNORECASE)
+    if address_match_1:
         market_address = MarketAddress(
-            street=address_match.group(1).replace('  ', ' ').replace(',', '').strip(),
-            zip=address_match.group(2),
-            city=address_match.group(3).strip()
+            street=address_match_1.group(1).replace('  ', ' ').replace(',', '').strip(),
+            zip=address_match_1.group(2),
+            city=address_match_1.group(3).strip()
+        )
+    elif address_match_2:
+        market_address = MarketAddress(
+            street=address_match_2.group(1).replace('  ', ' ').replace(',', '').strip(),
+            zip=address_match_2.group(2),
+            city=address_match_2.group(3).strip()
         )
 
     for line in lines:
-        item_hit = re.match(r'([0-9A-Za-zäöüÄÖÜß &%.!+,\-]*) (-?\d*,\d\d) ([AB]) ?(\*?)', line)
+        item_hit = re.match(r'([0-9A-Za-zäöüß &%.!+,\-]*) (-?\d*,\d\d) ([AB]) ?(\*?)', line)
         if item_hit:
             item = item_hit.group(1)
             price = float(item_hit.group(2).replace(',', '.'))
@@ -265,8 +291,16 @@ def parse_ebon(data_buffer: bytes) -> dict:
     return ordered_receipt_dict
 
 def parse_pdf_ebon(pdf_path: str) -> dict:
+    """
+    Parse receipt data from a PDF file.
+
+    Args:
+        pdf_path (str): Path to the input PDF file.
+
+    Returns:
+        dict: The parsed receipt data.
+    """
     with open(pdf_path, 'rb') as f:
         data = f.read()
         result = parse_ebon(data)
         return result
-    

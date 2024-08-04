@@ -8,6 +8,9 @@ from . import __version__
 import json
 
 def main():
+    """
+    Main function to parse REWE eBons from PDF to JSON or CSV table.
+    """
     parser = argparse.ArgumentParser(description="Parse REWE eBons from PDF to JSON or CSV table.")
     parser.add_argument("input_path", type=str, nargs='?', help="Path to input PDF file or folder containing PDF files.")
     parser.add_argument("output_path", type=str, nargs='?', default=None, help="Path to output JSON/CSV file or folder for JSON files.")

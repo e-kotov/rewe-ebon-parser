@@ -8,6 +8,18 @@ from tqdm import tqdm
 from .parse import extract_raw_text, parse_ebon
 
 def process_pdf(pdf_path, output_path=None, rawtext_file=False, rawtext_stdout=False):
+    """
+    Process a single PDF file to extract receipt data.
+
+    Args:
+        pdf_path (Path): Path to the input PDF file.
+        output_path (Optional[Path]): Path to the output JSON file.
+        rawtext_file (bool): If True, output raw text to a file.
+        rawtext_stdout (bool): If True, print raw text to the console.
+
+    Returns:
+        dict: Parsed receipt data.
+    """
     output_path = Path(output_path) if output_path else None
     if output_path:
         output_path.parent.mkdir(parents=True, exist_ok=True)  # Ensure the output directory exists
@@ -37,6 +49,22 @@ def process_pdf(pdf_path, output_path=None, rawtext_file=False, rawtext_stdout=F
         raise
 
 def process_folder(input_folder, output_folder=None, max_workers=None, rawtext_file=False, rawtext_stdout=False):
+    """
+    Process all PDF files in a folder to extract receipt data.
+
+    Args:
+        input_folder (Path): Path to the input folder containing PDF files.
+        output_folder (Optional[Path]): Path to the output folder for JSON files.
+        max_workers (Optional[int]): Maximum number of concurrent threads to use.
+        rawtext_file (bool): If True, output raw text to files.
+        rawtext_stdout (bool): If True, print raw text to the console.
+
+    Returns:
+        List[dict]: List of parsed receipt data dictionaries.
+    
+    Raises:
+        ValueError: If both JSON and PDF files are found in the input folder.
+    """
     if output_folder:
         output_folder.mkdir(parents=True, exist_ok=True)
 
@@ -46,9 +74,13 @@ def process_folder(input_folder, output_folder=None, max_workers=None, rawtext_f
     log_entries = []
 
     pdf_files = list(input_folder.glob("*.pdf"))
+    json_files = list(input_folder.glob("*.json"))
     total_files = len(pdf_files)
     parsed_receipts = []
 
+    if pdf_files and json_files:
+        raise ValueError("Only one type of files (PDF or JSON) is allowed in the source folder at the same time.")
+    
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         futures = {}
         for pdf_file in pdf_files:
@@ -69,6 +101,16 @@ def process_folder(input_folder, output_folder=None, max_workers=None, rawtext_f
                     log_entries.append((pdf_file.name, "Failure", str(exc)))
                     failure_count += 1
                 pbar.update(1)
+
+    for json_file in json_files:
+        try:
+            with open(json_file, 'r', encoding='utf-8') as f:
+                parsed_receipts.append(json.load(f))
+            log_entries.append((json_file.name, "Success", ""))
+            success_count += 1
+        except Exception as exc:
+            log_entries.append((json_file.name, "Failure", str(exc)))
+            failure_count += 1
 
     end_time = time.time()
     elapsed_time = end_time - start_time

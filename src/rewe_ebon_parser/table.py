@@ -5,6 +5,13 @@ from pathlib import Path
 from typing import List, Dict
 
 def dump_items_to_csv(parsed_receipts: List[Dict], output_path: Path):
+    """
+    Dump all items from parsed receipts into a CSV file.
+
+    Args:
+        parsed_receipts (List[Dict]): List of parsed receipt data.
+        output_path (Path): Path to the output CSV file.
+    """
     items = []
     for receipt in parsed_receipts:
         for item in receipt['items']:
