@@ -56,6 +56,8 @@ rewe-ebon-parser examples/eBons/
 - `--nthreads`: Number of concurrent threads to use for processing files.
 - `--rawtext-file`: Output raw text extracted from the PDF files to .txt files (mostly for debugging).
 - `--rawtext-stdout`: Print raw text extracted from the PDF files to the console (mostly for debugging).
+- `--version`: show module version.
+- `-h`, `--help`: show help.
 
 #### Auto-detection Mode
 

@@ -11,12 +11,18 @@ def main():
     parser.add_argument("output_path", type=str, nargs='?', default=None, help="Path to output JSON file or folder for JSON files.")
     parser.add_argument("--file", action="store_true", help="Specify if the input and output paths are files.")
     parser.add_argument("--folder", action="store_true", help="Specify if the input and output paths are folders.")
-    parser.add_argument("--nthreads", type=int, default=None, help="Number of concurrent threads to use for processing files.")
+    parser.add_argument("--nthreads", type=int, default=None, help="Number of concurrent threads to use for processing files. Defaults to maximum available cpu cores.")
     parser.add_argument("--rawtext-file", action="store_true", help="Output raw text extracted from the PDF files to .txt files.")
     parser.add_argument("--rawtext-stdout", action="store_true", help="Print raw text extracted from the PDF files to the console.")
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}", help="Show the version number and exit.")
 
     args = parser.parse_args()
+    
+    # Print help if no arguments are provided
+    if len(sys.argv) == 1:
+        parser.print_help(sys.stderr)
+        sys.exit(1)
+
     input_path = Path(args.input_path) if args.input_path else None
     output_path = Path(args.output_path) if args.output_path else None
     max_workers = args.nthreads
