@@ -35,3 +35,11 @@ rewe-ebon-parser = "rewe_ebon_parser.cli:main"
 [project.urls]
 Homepage = "https://github.com/e-kotov/rewe-ebon-parser"
 Issues = "https://github.com/e-kotov/rewe-ebon-parser/issues"
+
+[tool.hatch.build]
+exclude = [
+  "**/.*",
+  "docs",
+  "tests",
+  "examples"
+]
