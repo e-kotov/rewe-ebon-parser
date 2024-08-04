@@ -1,7 +1,7 @@
 
 # REWE eBon Parser
 
-The REWE eBon Parser is a Python package designed to parse REWE eBons (receipts) from PDF files and convert them into structured JSON format. The package also provides functionality to output raw text extracted from the PDFs for debugging purposes. This project is a re-write of the the [`rewe-ebon-parser`](https://github.com/webD97/rewe-ebon-parser) TypeScript library.
+The REWE eBon Parser is a Python package designed to parse REWE eBons (receipts) from PDF files and convert them into structured JSON format. The package also provides functionality to output raw text extracted from the PDFs for debugging purposes. This project is a re-write of the the [`rewe-ebon-parser`](https://github.com/webD97/rewe-ebon-parser) TypeScript library, example PDFs are borrowed from the same library.
 
 ## Features
 
@@ -21,7 +21,7 @@ pip install rewe-ebon-parser
 
 ## Usage
 
-*You can find PDF receipt files to test on in [`rewe-ebon-parser`](https://github.com/webD97/rewe-ebon-parser).*
+*You can find PDF receipt files to test on in the `examples/eBons` folder in this repo borrowed from [`rewe-ebon-parser`](https://github.com/webD97/rewe-ebon-parser).*
 
 ### Command Line Interface (CLI)
 
@@ -31,10 +31,22 @@ pip install rewe-ebon-parser
 rewe-ebon-parser [--file] <input_pdf_path> [output_json_path]
 ```
 
+Example:
+
+```bash
+rewe-ebon-parser examples/eBons/1.pdf
+```
+
 #### Parsing Multiple PDF Files in a Folder
 
 ```bash
 rewe-ebon-parser [--folder] <input_folder> [output_folder] [--nthreads <number_of_threads>] 
+```
+
+Example:
+
+```bash
+rewe-ebon-parser examples/eBons/
 ```
 
 #### Optional Arguments
@@ -66,7 +78,7 @@ A detailed log of processing results will be saved in the output folder as `proc
 ```python
 from rewe_ebon_parser.parse import parse_pdf_ebon
 
-parse_pdf_ebon("./examples/eBons/1.pdf")
+parse_pdf_ebon("examples/eBons/1.pdf")
 ```
 
 #### Passing a data_buffer: bytes
@@ -82,7 +94,7 @@ def process_pdf(pdf_path):
         result = parse_ebon(data)
         return result
 
-process_pdf("./examples/eBons/1.pdf")
+process_pdf("examples/eBons/1.pdf")
 ```
 
 
