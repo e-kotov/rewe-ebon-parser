@@ -21,6 +21,8 @@ pip install rewe-ebon-parser
 
 ## Usage
 
+*You can find PDF receipt files to test on in [`rewe-ebon-parser`](https://github.com/webD97/rewe-ebon-parser).*
+
 ### Command Line Interface (CLI)
 
 #### Parse a Single PDF File and save to JSON
@@ -87,3 +89,12 @@ process_pdf("./examples/eBons/1.pdf")
 ## License
 
 This project is licensed under the MIT License. For details see [LICENSE](LICENSE) file.
+
+
+## Caveats
+
+So far the module reliably parses the items, but sometimes fails on PAYBACK points, as these are often presented differently in REWE receipts.
+
+## Future Work
+
+- Dump all shopping items into a single CSV file with purchase dates.
