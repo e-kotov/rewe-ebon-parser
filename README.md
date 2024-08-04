@@ -1,3 +1,4 @@
+[![Python package](https://github.com/e-kotov/rewe-ebon-parser/actions/workflows/python-package-test.yml/badge.svg)](https://github.com/e-kotov/rewe-ebon-parser/actions/workflows/python-package-test.yml)
 
 # REWE eBon Parser
 
