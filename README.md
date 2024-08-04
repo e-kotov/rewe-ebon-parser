@@ -7,7 +7,7 @@ The REWE eBon Parser is a Python package designed to parse REWE eBons (receipts)
 
 - Parse individual PDF files or entire folders containing PDF files.
 - Output parsed data as JSON.
-- Extract and output raw text from PDF files.
+- Extract and output raw text from PDF files (bascially, the output of the underlying `pdfplumber`).
 - Concurrent processing of multiple PDF files with adjustable threading.
 - Detailed logging of processing results in CSV format.
 
@@ -29,7 +29,6 @@ pip install rewe-ebon-parser
 rewe-ebon-parser [--file] <input_pdf_path> [output_json_path]
 ```
 
-
 #### Parsing Multiple PDF Files in a Folder
 
 ```bash
@@ -44,18 +43,45 @@ rewe-ebon-parser [--folder] <input_folder> [output_folder] [--nthreads <number_o
 - `--rawtext-file`: Output raw text extracted from the PDF files to .txt files (mostly for debugging).
 - `--rawtext-stdout`: Print raw text extracted from the PDF files to the console (mostly for debugging).
 
-### Auto-detection Mode
+#### Auto-detection Mode
 
 If neither `--file` nor `--folder` is specified, the script will automatically detect if the input path is a file or a folder and process accordingly.
 
-### Output
+#### Output
 
 - If `output_json_path` is not specified for a single file, the output will be saved in the same directory as the input file with a `.json` extension.
 - If `output_folder` is not specified for a folder, a subfolder named `rewe_json_out` will be created in the input folder, and the output JSON files will be saved there.
 
-### Logging
+#### Logging
 
 A detailed log of processing results will be saved in the output folder as `processing_log.csv`, containing information on which files were successfully processed and which failed, along with error messages if any.
+
+
+### Use as a Python module in your own Python code
+
+#### Direct use on files
+
+```python
+from rewe_ebon_parser.parse import parse_pdf_ebon
+
+parse_pdf_ebon("./examples/eBons/1.pdf")
+```
+
+#### Passing a data_buffer: bytes
+
+```python
+from rewe_ebon_parser.parse import parse_ebon
+
+# here the function is once again getting the data from a file,
+# but input can come from anywhere
+def process_pdf(pdf_path):
+    with open(pdf_path, 'rb') as f:
+        data = f.read()
+        result = parse_ebon(data)
+        return result
+
+process_pdf("./examples/eBons/1.pdf")
+```
 
 
 ## License

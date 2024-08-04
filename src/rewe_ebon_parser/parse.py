@@ -263,3 +263,10 @@ def parse_ebon(data_buffer: bytes) -> dict:
     ordered_receipt_dict = {k: v for k, v in ordered_receipt_dict.items() if v is not None}
 
     return ordered_receipt_dict
+
+def parse_pdf_ebon(pdf_path: str) -> dict:
+    with open(pdf_path, 'rb') as f:
+        data = f.read()
+        result = parse_ebon(data)
+        return result
+    
