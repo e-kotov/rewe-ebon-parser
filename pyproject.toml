@@ -34,6 +34,7 @@ rewe-ebon-parser = "rewe_ebon_parser.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/e-kotov/rewe-ebon-parser"
+Repository = "https://github.com/e-kotov/rewe-ebon-parser"
 Issues = "https://github.com/e-kotov/rewe-ebon-parser/issues"
 Changelog = "https://github.com/e-kotov/rewe-ebon-parser/blob/main/CHANGELOG.md"
 
