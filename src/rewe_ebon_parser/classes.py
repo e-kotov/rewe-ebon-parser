@@ -1,4 +1,4 @@
-# classes.py
+# src/rewe_ebon_parser/classes.py
 import math
 from datetime import datetime
 from typing import List, Optional

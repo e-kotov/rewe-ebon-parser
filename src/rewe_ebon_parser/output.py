@@ -1,4 +1,4 @@
-# output.py
+# src/rewe_ebon_parser/output.py
 import json
 import time
 import csv
@@ -30,6 +30,8 @@ def process_pdf(pdf_path, output_path=None, rawtext_file=False, rawtext_stdout=F
             if result and output_path:
                 with open(output_path, 'w', encoding='utf-8') as json_file:
                     json.dump(result, json_file, default=str, indent=2, ensure_ascii=False)
+            
+            return result
     except Exception as e:
         print(f"Failed to process {pdf_path}: {e}")
         raise
@@ -45,6 +47,7 @@ def process_folder(input_folder, output_folder=None, max_workers=None, rawtext_f
 
     pdf_files = list(input_folder.glob("*.pdf"))
     total_files = len(pdf_files)
+    parsed_receipts = []
 
     with ProcessPoolExecutor(max_workers=max_workers) as executor:
         futures = {}
@@ -57,7 +60,9 @@ def process_folder(input_folder, output_folder=None, max_workers=None, rawtext_f
             for future in as_completed(futures):
                 pdf_file = futures[future]
                 try:
-                    future.result()
+                    result = future.result()
+                    if result:
+                        parsed_receipts.append(result)
                     log_entries.append((pdf_file.name, "Success", ""))
                     success_count += 1
                 except Exception as exc:
@@ -80,4 +85,5 @@ def process_folder(input_folder, output_folder=None, max_workers=None, rawtext_f
             log_writer = csv.writer(csvfile)
             log_writer.writerow(["File Name", "Status", "Error Message"])
             log_writer.writerows(log_entries)
-
+    
+    return parsed_receipts

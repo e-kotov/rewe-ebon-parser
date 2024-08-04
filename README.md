@@ -2,12 +2,12 @@
 
 # REWE eBon Parser
 
-The REWE eBon Parser is a Python package designed to parse REWE eBons (receipts) from PDF files and convert them into structured JSON format. The package also provides functionality to output raw text extracted from the PDFs for debugging purposes. This project is a re-write of the the [`rewe-ebon-parser`](https://github.com/webD97/rewe-ebon-parser) TypeScript library, example PDFs are borrowed from the same library.
+The REWE eBon Parser is a Python package designed to parse REWE eBons (receipts) from PDF files and convert them into structured JSON format or CSV. The package also provides functionality to output raw text extracted from the PDFs for debugging purposes. This project is a re-write of the the [`rewe-ebon-parser`](https://github.com/webD97/rewe-ebon-parser) TypeScript library, example PDFs are borrowed from the same library.
 
 ## Features
 
 - Parse individual PDF files or entire folders containing PDF files.
-- Output parsed data as JSON.
+- Output parsed data as JSON or CSV.
 - Extract and output raw text from PDF files (bascially, the output of the underlying `pdfplumber`).
 - Concurrent processing of multiple PDF files with adjustable threading.
 - Detailed logging of processing results in CSV format.
@@ -38,7 +38,7 @@ Example:
 rewe-ebon-parser examples/eBons/1.pdf
 ```
 
-#### Parsing Multiple PDF Files in a Folder
+#### Parsing Multiple PDF Files in a Folder into JSON files
 
 ```bash
 rewe-ebon-parser [--folder] <input_folder> [output_folder] [--nthreads <number_of_threads>] 
@@ -50,6 +50,49 @@ Example:
 rewe-ebon-parser examples/eBons/
 ```
 
+#### Parse a Single PDF File and Save Items to CSV Table
+
+```bash
+rewe-ebon-parser [--file] <input_pdf_path> [output_csv_path] [--csv-table]
+```
+
+Example:
+
+```bash
+rewe-ebon-parser examples/eBons/1.pdf --csv-table
+```
+
+#### Parsing Multiple PDF Files in a Folder into a single CSV Table
+
+```bash
+rewe-ebon-parser [--folder] <input_folder> [output_folder] [--nthreads <number_of_threads>] [--csv-table]
+```
+
+
+Example (the module automatically detects if its a folder of PDFs or JSONs):
+
+```bash
+rewe-ebon-parser examples/eBons/ --csv-table
+```
+
+*Note: the module will fail if the folder contains both JSON and PDF files to avoid duplicating the same data.*
+
+#### Combine a Folder with Multiple JSON Files (previously extracted with the module) into a single CSV Table
+
+```bash
+rewe-ebon-parser [--folder] <input_folder> [output_csv_path] [--combine-json] [--nthreads <number_of_threads>]
+```
+
+Example (the module automatically detects if its a folder of PDFs or JSONs):
+
+```bash
+rewe-ebon-parser examples/eBons/ --csv-table
+```
+
+*Note: the module will fail if the folder contains both JSON and PDF files to avoid duplicating the same data.*
+
+
+
 #### Optional Arguments
 
 - `--file`: Explicitly specify if the input and output paths are files.
@@ -57,6 +100,7 @@ rewe-ebon-parser examples/eBons/
 - `--nthreads`: Number of concurrent threads to use for processing files.
 - `--rawtext-file`: Output raw text extracted from the PDF files to .txt files (mostly for debugging).
 - `--rawtext-stdout`: Print raw text extracted from the PDF files to the console (mostly for debugging).
+- `--csv-table`: Output parsed data as a CSV table.
 - `--version`: show module version.
 - `-h`, `--help`: show help.
 
@@ -112,4 +156,4 @@ So far the module reliably parses the items, but sometimes fails on PAYBACK poin
 
 ## Future Work
 
-- Dump all shopping items into a single CSV file with purchase dates.
+- Fix bugs with occasional parsing failures in datetime and PAYBACK points.

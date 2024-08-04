@@ -1,4 +1,4 @@
-# parse.py
+# src/rewe_ebon_parser/parse.py
 import re
 from datetime import datetime
 from typing import List, Optional

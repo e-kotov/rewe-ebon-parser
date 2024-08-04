@@ -4,11 +4,11 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rewe-ebon-parser"
-version = "0.0.5"
+version = "0.0.6"
 authors = [
   { name="Egor Kotov", email="kotov.egor@gmail.com" },
 ]
-description = "Parse and convert REWE eBons (digital receipts) to JSON."
+description = "Parse and convert REWE eBons (digital receipts) to JSON and CSV."
 readme = "README.md"
 requires-python = ">=3.6"
 classifiers = [
@@ -35,6 +35,7 @@ rewe-ebon-parser = "rewe_ebon_parser.cli:main"
 [project.urls]
 Homepage = "https://github.com/e-kotov/rewe-ebon-parser"
 Issues = "https://github.com/e-kotov/rewe-ebon-parser/issues"
+Changelog = "https://github.com/e-kotov/rewe-ebon-parser/blob/main/CHANGELOG.md"
 
 [tool.hatch.build]
 exclude = [
