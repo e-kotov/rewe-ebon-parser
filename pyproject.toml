@@ -33,10 +33,10 @@ dev = [
 rewe-ebon-parser = "rewe_ebon_parser.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/e-kotov/rewe-ebon-parser"
-Repository = "https://github.com/e-kotov/rewe-ebon-parser"
-Issues = "https://github.com/e-kotov/rewe-ebon-parser/issues"
-Changelog = "https://github.com/e-kotov/rewe-ebon-parser/blob/main/CHANGELOG.md"
+homepage = "https://github.com/e-kotov/rewe-ebon-parser"
+source = "https://github.com/e-kotov/rewe-ebon-parser"
+issues = "https://github.com/e-kotov/rewe-ebon-parser/issues"
+changelog = "https://github.com/e-kotov/rewe-ebon-parser/blob/main/CHANGELOG.md"
 
 [tool.hatch.build]
 exclude = [
