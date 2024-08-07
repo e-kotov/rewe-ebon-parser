@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rewe-ebon-parser"
-version = "0.0.6"
+version = "0.0.7"
 authors = [
   { name="Egor Kotov", email="kotov.egor@gmail.com" },
 ]
@@ -27,6 +27,13 @@ dependencies = [
 dev = [
     "pytest",
     "pytest-asyncio"
+]
+
+docs = [
+    "sphinx",
+    "sphinx-rtd-theme",
+    "sphinx-autodoc-typehints",
+    "recommonmark"
 ]
 
 [project.scripts]
