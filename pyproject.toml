@@ -31,9 +31,10 @@ dev = [
 
 docs = [
     "sphinx",
-    "sphinx-rtd-theme",
-    "sphinx-autodoc-typehints",
-    "recommonmark"
+    "sphinx_rtd_theme",
+    "myst-parser",
+    "recommonmark",
+    "sphinx-autodoc-typehints"
 ]
 
 [project.scripts]
