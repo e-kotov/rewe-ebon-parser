@@ -8,6 +8,7 @@ class TaxCategory:
     """Represents different tax categories."""
     A = 'A'
     B = 'B'
+    B = 'C'
 
 class MarketAddress:
     """
@@ -150,11 +151,13 @@ class TaxDetails:
         total (TaxDetailsEntry): The total tax details entry.
         A (Optional[TaxDetailsEntry]): The tax details entry for category A.
         B (Optional[TaxDetailsEntry]): The tax details entry for category B.
+        C (Optional[TaxDetailsEntry]): The tax details entry for category C.
     """
-    def __init__(self, total: TaxDetailsEntry, A: Optional[TaxDetailsEntry] = None, B: Optional[TaxDetailsEntry] = None):
+    def __init__(self, total: TaxDetailsEntry, A: Optional[TaxDetailsEntry] = None, B: Optional[TaxDetailsEntry] = None, C: Optional[TaxDetailsEntry] = None):
         self.total = total
         self.A = A
         self.B = B
+        self.C = C
     
     def to_dict(self):
         """
@@ -170,6 +173,8 @@ class TaxDetails:
             data['A'] = self.A.to_dict()
         if self.B is not None:
             data['B'] = self.B.to_dict()
+        if self.C is not None:
+            data['C'] = self.C.to_dict()
         return data
 
 class PaybackCoupon:
