@@ -109,6 +109,15 @@ def parse_ebon(data_buffer: bytes) -> dict:
                 items[-1].price_per_unit = price_per_unit
             continue
 
+        menge_handeingabe_hit = re.match(r"Handeingabe E-Bon\s*(\d+,\d+)\s*([a-zA-Z]*)", line)
+        if menge_handeingabe_hit:
+            amount = float(menge_handeingabe_hit.group(1).replace(",","."))
+            unit = menge_handeingabe_hit.group(2)
+            if items:
+                items[-1].amount = amount
+                items[-1].unit = unit
+                items[-1].price_per_unit = items[-1].sub_total/amount
+
         total_hit = re.match(r'SUMME EUR (-?\d*,\d\d)', line)
         if total_hit:
             total = float(total_hit.group(1).replace(',', '.'))
