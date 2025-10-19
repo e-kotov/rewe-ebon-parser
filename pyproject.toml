@@ -19,8 +19,9 @@ classifiers = [
 
 dependencies = [
     "pdfplumber",
+    "pytest>=7.0.1",
     "pytz",
-    "tqdm"
+    "tqdm",
 ]
 
 [project.optional-dependencies]

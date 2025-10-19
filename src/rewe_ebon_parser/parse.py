@@ -61,6 +61,7 @@ def parse_ebon(data_buffer: bytes) -> dict:
     tax_details_total = TaxDetailsEntry(float('nan'), float('nan'), float('nan'), float('nan'))
     tax_details_A = None
     tax_details_B = None
+    tax_details_C = None
 
     # Improved address extraction logic to handle both formats
     address_match_1 = re.search(r'[\s\*]*([a-zäöüß \d.,-]+?)\s*[\s\*]*(\d{5})\s*([a-zäöüß \d.,-]+)[\s\*]*', data_text, re.IGNORECASE)
@@ -79,7 +80,7 @@ def parse_ebon(data_buffer: bytes) -> dict:
         )
 
     for line in lines:
-        item_hit = re.match(r'([0-9A-Za-zäöüß &%.!+,\-]*) (-?\d*,\d\d) ([AB]) ?(\*?)', line)
+        item_hit = re.match(r'([0-9A-Za-zäöüß &%.!+,\-]*) (-?\d*,\d\d) ([ABC]) ?(\*?)', line)
         if item_hit:
             item = item_hit.group(1)
             price = float(item_hit.group(2).replace(',', '.'))
@@ -203,7 +204,7 @@ def parse_ebon(data_buffer: bytes) -> dict:
             ))
             continue
 
-        tax_details_match = re.match(r'([AB])= ([0-9,]*)% ([0-9,]*) ([0-9,]*) ([0-9,]*)', line)
+        tax_details_match = re.match(r'([ABC])= ([0-9,]*)% ([0-9,]*) ([0-9,]*) ([0-9,]*)', line)
         if tax_details_match:
             category = tax_details_match.group(1)
             tax_details_entry = TaxDetailsEntry(
@@ -216,6 +217,8 @@ def parse_ebon(data_buffer: bytes) -> dict:
                 tax_details_A = tax_details_entry
             elif category == 'B':
                 tax_details_B = tax_details_entry
+            elif category == 'C':
+                tax_details_C = tax_details_entry
             continue
 
         total_tax_match = re.match(r'Gesamtbetrag ([0-9,]*) ([0-9,]*) ([0-9,]*)', line)
@@ -269,10 +272,11 @@ def parse_ebon(data_buffer: bytes) -> dict:
             payback_revenue=qualified_revenue
         ) if payback_card_number != '?' else None,
         tax_details=TaxDetails(
-            total=tax_details_total,
-            A=tax_details_A,
-            B=tax_details_B
-        )
+                total=tax_details_total,
+                A=tax_details_A,
+                B=tax_details_B,
+                C=tax_details_C
+            )
     )
 
     # Create an ordered dictionary to ensure specific order of keys
