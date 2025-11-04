@@ -26,18 +26,16 @@ def extract_raw_text(data_buffer: bytes) -> str:
             raw_text += page.extract_text()
     return raw_text
 
-def parse_ebon(data_buffer: bytes) -> dict:
+def _parse_ebon_from_text(data_text: str) -> dict:
     """
-    Parse receipt data from a PDF data buffer.
+    Parse receipt data from a raw text.
 
     Args:
-        data_buffer (bytes): The PDF data buffer.
+        data_text (str): The raw text from ebon.
 
     Returns:
         dict: The parsed receipt data.
     """
-    data_text = extract_raw_text(data_buffer)
-
     lines = list(filter(None, map(str.strip, data_text.replace('  ', ' ').split('\n'))))
 
     date = None
@@ -80,9 +78,9 @@ def parse_ebon(data_buffer: bytes) -> dict:
         )
 
     for line in lines:
-        item_hit = re.match(r'([0-9A-Za-zäöüß &%.!+,\-]*) (-?\d*,\d\d) ([ABC]) ?(\*?)', line)
+        item_hit = re.match(r'(.*?)\s+(-?\d*,\d\d) ([ABC]) ?(\*?)$', line)
         if item_hit:
-            item = item_hit.group(1)
+            item = item_hit.group(1).strip()
             price = float(item_hit.group(2).replace(',', '.'))
             category = item_hit.group(3)
             payback_qualified = not item_hit.group(4) and price > 0
@@ -112,7 +110,7 @@ def parse_ebon(data_buffer: bytes) -> dict:
 
         menge_handeingabe_hit = re.match(r"Handeingabe E-Bon\s*(\d+,\d+)\s*([a-zA-Z]*)", line)
         if menge_handeingabe_hit:
-            amount = float(menge_handeingabe_hit.group(1).replace(",","."))
+            amount = float(menge_handeingabe_hit.group(1).replace(",", "."))
             unit = menge_handeingabe_hit.group(2)
             if items:
                 items[-1].amount = amount
@@ -163,7 +161,7 @@ def parse_ebon(data_buffer: bytes) -> dict:
             cashier = markt_match.group(3).strip()
             continue
 
-        uid_match = re.match(r'UID Nr.: (.*)', line)
+        uid_match = re.match(r'UID Nr\.: (.*)', line)
         if uid_match:
             uid = uid_match.group(1).strip()
             continue
@@ -208,9 +206,9 @@ def parse_ebon(data_buffer: bytes) -> dict:
         if tax_details_match:
             category = tax_details_match.group(1)
             tax_details_entry = TaxDetailsEntry(
-                tax_percent=float(tax_details_match.group(2).replace(',', '.')),
-                net=float(tax_details_match.group(3).replace(',', '.')),
-                tax=float(tax_details_match.group(4).replace(',', '.')),
+                tax_percent=float(tax_details_match.group(2).replace(',', '.')), 
+                net=float(tax_details_match.group(3).replace(',', '.')), 
+                tax=float(tax_details_match.group(4).replace(',', '.')), 
                 gross=float(tax_details_match.group(5).replace(',', '.'))
             )
             if category == 'A':
@@ -225,8 +223,8 @@ def parse_ebon(data_buffer: bytes) -> dict:
         if total_tax_match:
             tax_details_total = TaxDetailsEntry(
                 tax_percent=float('nan'),
-                net=float(total_tax_match.group(1).replace(',', '.')),
-                tax=float(total_tax_match.group(2).replace(',', '.')),
+                net=float(total_tax_match.group(1).replace(',', '.')), 
+                tax=float(total_tax_match.group(2).replace(',', '.')), 
                 gross=float(total_tax_match.group(3).replace(',', '.'))
             )
             continue
@@ -295,13 +293,26 @@ def parse_ebon(data_buffer: bytes) -> dict:
         ('change', receipt_dict.get('change')),
         ('payout', receipt_dict.get('payout')),
         ('payback', receipt_dict.get('payback')),
-        ('taxDetails', receipt_dict.get('taxDetails')),
+        ('taxDetails', receipt_dict.get('taxDetails'))
     ])
 
     # Remove None values to clean up the dictionary
     ordered_receipt_dict = {k: v for k, v in ordered_receipt_dict.items() if v is not None}
 
     return ordered_receipt_dict
+
+def parse_ebon(data_buffer: bytes) -> dict:
+    """
+    Parse receipt data from a PDF data buffer.
+
+    Args:
+        data_buffer (bytes): The PDF data buffer.
+
+    Returns:
+        dict: The parsed receipt data.
+    """
+    data_text = extract_raw_text(data_buffer)
+    return _parse_ebon_from_text(data_text)
 
 def parse_pdf_ebon(pdf_path: str) -> dict:
     """
