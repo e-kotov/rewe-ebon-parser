@@ -10,7 +10,7 @@ authors = [
 ]
 description = "Parse and convert REWE eBons (digital receipts) to JSON and CSV."
 readme = "README.md"
-requires-python = ">=3.6"
+requires-python = ">=3.9"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",

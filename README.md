@@ -98,6 +98,8 @@ rewe-ebon-parser examples/eBons/ --csv-table
 - `--file`: Explicitly specify if the input and output paths are files.
 - `--folder`: Explicitly specify if the input and output paths are folders.
 - `--nthreads`: Number of concurrent threads to use for processing files.
+- `--txt-dump`: Instead of parsing to JSON, this saves the raw extracted text from the PDF to a `.txt` file. Useful for debugging or inspection.
+- `--preserve-privacy`: Anonymizes sensitive information (like addresses, payment details, and personal data) in the output. This works for both JSON and text dump modes.
 - `--rawtext-file`: Output raw text extracted from the PDF files to .txt files (mostly for debugging).
 - `--rawtext-stdout`: Print raw text extracted from the PDF files to the console (mostly for debugging).
 - `--csv-table`: Output parsed data as a CSV table.
