@@ -17,6 +17,12 @@ def main():
     parser.add_argument("--file", action="store_true", help="Specify if the input and output paths are files.")
     parser.add_argument("--folder", action="store_true", help="Specify if the input and output paths are folders.")
     parser.add_argument("--nthreads", type=int, default=None, help="Number of concurrent threads to use for processing files. Defaults to maximum available CPU cores.")
+    
+    # MODIFICATION START: Add new arguments
+    parser.add_argument("--txt-dump", action="store_true", help="Output raw text extracted from the PDF files to .txt files instead of JSON.")
+    parser.add_argument("--preserve-privacy", action="store_true", help="Anonymize sensitive data in JSON or text dump outputs.")
+    # MODIFICATION END
+
     parser.add_argument("--rawtext-file", action="store_true", help="Output raw text extracted from the PDF files to .txt files.")
     parser.add_argument("--rawtext-stdout", action="store_true", help="Print raw text extracted from the PDF files to the console.")
     parser.add_argument("--csv-table", action="store_true", help="Output all items from all parsed receipts into a single CSV table.")
@@ -35,16 +41,47 @@ def main():
     rawtext_file = args.rawtext_file
     rawtext_stdout = args.rawtext_stdout
 
+    # MODIFICATION START: Add logic for --txt-dump
+    preserve_privacy = args.preserve_privacy
+
+    if args.txt_dump:
+        # Import moved to avoid circular dependency issues if any
+        from .output import process_pdf_to_text
+        if input_path.is_file():
+            if not output_path:
+                output_path = input_path.with_suffix('.txt')
+            process_pdf_to_text(input_path, output_path, preserve_privacy)
+        elif input_path.is_dir():
+            if not output_path:
+                output_path = input_path / 'rewe_txt_dump'
+            if not output_path.exists():
+                output_path.mkdir(parents=True, exist_ok=True)
+
+            for pdf_file in input_path.glob("*.pdf"):
+                txt_output_path = output_path / pdf_file.with_suffix('.txt').name
+                process_pdf_to_text(pdf_file, txt_output_path, preserve_privacy)
+            print(f"Text dump complete. Files saved in: {output_path}")
+        else:
+            print("Error: Invalid input path for --txt-dump.")
+            sys.exit(1)
+        return # Exit after dump
+    # MODIFICATION END
+
     if args.csv_table:
         if not output_path:
             output_path = input_path.with_suffix('.csv')
         if input_path.is_file():
             if input_path.suffix.lower() == '.pdf':
-                result = process_pdf(input_path, None, rawtext_file, rawtext_stdout)
+                # MODIFICATION: Pass preserve_privacy flag
+                result = process_pdf(input_path, None, rawtext_file, rawtext_stdout, preserve_privacy)
                 dump_items_to_csv([result], output_path)
             elif input_path.suffix.lower() == '.json':
                 with open(input_path, 'r', encoding='utf-8') as f:
                     result = json.load(f)
+                # Anonymize if flag is set, even from JSON source
+                if preserve_privacy:
+                    from .privacy import anonymize_receipt_dict
+                    result = anonymize_receipt_dict(result)
                 dump_items_to_csv([result], output_path)
             else:
                 print("Error: Input file must be a PDF or JSON file when using --csv-table.")
@@ -56,13 +93,18 @@ def main():
                 print("Error: Only one type of files (PDF or JSON) is allowed in the source folder at the same time.")
                 sys.exit(1)
             elif pdf_files:
-                parsed_receipts = process_folder(input_path, None, max_workers, rawtext_file, rawtext_stdout)
+                # MODIFICATION: Pass preserve_privacy flag
+                parsed_receipts = process_folder(input_path, None, max_workers, rawtext_file, rawtext_stdout, preserve_privacy)
                 dump_items_to_csv(parsed_receipts, output_path)
             elif json_files:
                 parsed_receipts = []
                 for json_file in json_files:
                     with open(json_file, 'r', encoding='utf-8') as f:
-                        parsed_receipts.append(json.load(f))
+                        receipt = json.load(f)
+                        if preserve_privacy:
+                            from .privacy import anonymize_receipt_dict
+                            receipt = anonymize_receipt_dict(receipt)
+                        parsed_receipts.append(receipt)
                 dump_items_to_csv(parsed_receipts, output_path)
             else:
                 print("Error: No valid input files found in the folder.")
@@ -75,7 +117,8 @@ def main():
             if not output_path:
                 output_path = input_path.with_suffix('.json')
             if input_path.is_file() and (output_path.is_file() or not output_path.exists()):
-                process_pdf(input_path, output_path, rawtext_file, rawtext_stdout)
+                # MODIFICATION: Pass preserve_privacy flag
+                process_pdf(input_path, output_path, rawtext_file, rawtext_stdout, preserve_privacy)
             else:
                 print("Error: Input and output paths must be files when using --file.")
                 sys.exit(1)
@@ -83,7 +126,8 @@ def main():
             if not output_path:
                 output_path = input_path / 'rewe_json_out'
             if input_path.is_dir() and (output_path.is_dir() or not output_path.exists()):
-                process_folder(input_path, output_path, max_workers, rawtext_file, rawtext_stdout)
+                # MODIFICATION: Pass preserve_privacy flag
+                process_folder(input_path, output_path, max_workers, rawtext_file, rawtext_stdout, preserve_privacy)
             else:
                 print("Error: Input and output paths must be directories when using --folder.")
                 sys.exit(1)
@@ -94,7 +138,8 @@ def main():
                     if not output_path:
                         output_path = input_path / 'rewe_json_out'
                     if output_path.is_dir() or not output_path.exists():
-                        process_folder(input_path, output_path, max_workers, rawtext_file, rawtext_stdout)
+                        # MODIFICATION: Pass preserve_privacy flag
+                        process_folder(input_path, output_path, max_workers, rawtext_file, rawtext_stdout, preserve_privacy)
                     else:
                         print("Error: Output path should be a directory when the input path is a directory.")
                         sys.exit(1)
@@ -102,7 +147,8 @@ def main():
                     if not output_path:
                         output_path = input_path.with_suffix('.json')
                     if output_path.is_file() or not output_path.exists():
-                        process_pdf(input_path, output_path, rawtext_file, rawtext_stdout)
+                        # MODIFICATION: Pass preserve_privacy flag
+                        process_pdf(input_path, output_path, rawtext_file, rawtext_stdout, preserve_privacy)
                     else:
                         print("Error: Output path should be a file when the input path is a file.")
                         sys.exit(1)

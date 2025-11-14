@@ -6,8 +6,36 @@ from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from tqdm import tqdm
 from .parse import extract_raw_text, parse_ebon
+# MODIFICATION START: Import anonymization functions
+from .privacy import anonymize_receipt_dict, anonymize_text_content
+# MODIFICATION END
 
-def process_pdf(pdf_path, output_path=None, rawtext_file=False, rawtext_stdout=False):
+# MODIFICATION START: Add a new function for text dumping
+def process_pdf_to_text(pdf_path: Path, output_path: Path, preserve_privacy: bool = False):
+    """
+    Process a single PDF file to extract and save its raw text content.
+
+    Args:
+        pdf_path (Path): Path to the input PDF file.
+        output_path (Path): Path to the output TXT file.
+        preserve_privacy (bool): If True, anonymize the text content.
+    """
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with open(pdf_path, 'rb') as f:
+            data = f.read()
+            raw_text = extract_raw_text(data)
+            
+            if preserve_privacy:
+                raw_text = anonymize_text_content(raw_text)
+            
+            output_path.write_text(raw_text, encoding='utf-8')
+    except Exception as e:
+        print(f"Failed to dump text from {pdf_path}: {e}")
+# MODIFICATION END
+
+# MODIFICATION: Add preserve_privacy parameter
+def process_pdf(pdf_path, output_path=None, rawtext_file=False, rawtext_stdout=False, preserve_privacy: bool = False):
     """
     Process a single PDF file to extract receipt data.
 
@@ -16,6 +44,7 @@ def process_pdf(pdf_path, output_path=None, rawtext_file=False, rawtext_stdout=F
         output_path (Optional[Path]): Path to the output JSON file.
         rawtext_file (bool): If True, output raw text to a file.
         rawtext_stdout (bool): If True, print raw text to the console.
+        preserve_privacy (bool): If True, anonymize the output.
 
     Returns:
         dict: Parsed receipt data.
@@ -30,14 +59,24 @@ def process_pdf(pdf_path, output_path=None, rawtext_file=False, rawtext_stdout=F
 
             if rawtext_file or rawtext_stdout:
                 raw_text = extract_raw_text(data)
+                # MODIFICATION: Anonymize raw text if requested
+                if preserve_privacy:
+                    raw_text = anonymize_text_content(raw_text)
                 if rawtext_file:
                     rawtext_path = output_path.with_suffix('.txt') if output_path else pdf_path.with_suffix('.txt')
                     rawtext_path.write_text(raw_text, encoding='utf-8')
                 if rawtext_stdout:
                     print(raw_text)
-                return
-
+                # NOTE: The original function returns here. If you want parsing + raw text, adjust this.
+                # Assuming rawtext flags are for debugging and exclusive of JSON output.
+                # If we proceed, the parsing will happen on the original text, not the anonymized one.
+                # This seems correct for the original feature's intent.
+                
             result = parse_ebon(data)
+
+            # MODIFICATION: Anonymize the result dictionary if requested
+            if preserve_privacy:
+                result = anonymize_receipt_dict(result)
 
             if result and output_path:
                 with open(output_path, 'w', encoding='utf-8') as json_file:
@@ -48,7 +87,8 @@ def process_pdf(pdf_path, output_path=None, rawtext_file=False, rawtext_stdout=F
         print(f"Failed to process {pdf_path}: {e}")
         raise
 
-def process_folder(input_folder, output_folder=None, max_workers=None, rawtext_file=False, rawtext_stdout=False):
+# MODIFICATION: Add preserve_privacy parameter
+def process_folder(input_folder, output_folder=None, max_workers=None, rawtext_file=False, rawtext_stdout=False, preserve_privacy: bool = False):
     """
     Process all PDF files in a folder to extract receipt data.
 
@@ -58,6 +98,7 @@ def process_folder(input_folder, output_folder=None, max_workers=None, rawtext_f
         max_workers (Optional[int]): Maximum number of concurrent threads to use.
         rawtext_file (bool): If True, output raw text to files.
         rawtext_stdout (bool): If True, print raw text to the console.
+        preserve_privacy (bool): If True, anonymize the output.
 
     Returns:
         List[dict]: List of parsed receipt data dictionaries.
@@ -85,7 +126,8 @@ def process_folder(input_folder, output_folder=None, max_workers=None, rawtext_f
         futures = {}
         for pdf_file in pdf_files:
             output_file = (output_folder / (pdf_file.stem + ".json")) if output_folder else None
-            future = executor.submit(process_pdf, pdf_file, output_file, rawtext_file, rawtext_stdout)
+            # MODIFICATION: Pass preserve_privacy flag to the worker
+            future = executor.submit(process_pdf, pdf_file, output_file, rawtext_file, rawtext_stdout, preserve_privacy)
             futures[future] = pdf_file
 
         with tqdm(total=total_files, desc="Processing PDFs", unit="file") as pbar:
@@ -105,7 +147,11 @@ def process_folder(input_folder, output_folder=None, max_workers=None, rawtext_f
     for json_file in json_files:
         try:
             with open(json_file, 'r', encoding='utf-8') as f:
-                parsed_receipts.append(json.load(f))
+                receipt = json.load(f)
+                # MODIFICATION: Anonymize if processing from JSON source
+                if preserve_privacy:
+                    receipt = anonymize_receipt_dict(receipt)
+                parsed_receipts.append(receipt)
             log_entries.append((json_file.name, "Success", ""))
             success_count += 1
         except Exception as exc:
