@@ -114,6 +114,7 @@ If neither `--file` nor `--folder` is specified, the script will automatically d
 
 - If `output_json_path` is not specified for a single file, the output will be saved in the same directory as the input file with a `.json` extension.
 - If `output_folder` is not specified for a folder, a subfolder named `rewe_json_out` will be created in the input folder, and the output JSON files will be saved there.
+- When using `--rawtext-file` with a folder, the output text files will be saved in a `rewe_txt_out` subfolder.
 
 #### Logging
 
