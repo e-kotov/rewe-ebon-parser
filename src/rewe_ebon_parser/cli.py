@@ -124,7 +124,10 @@ def main():
                 sys.exit(1)
         elif args.folder:
             if not output_path:
-                output_path = input_path / 'rewe_json_out'
+                if args.rawtext_file:
+                    output_path = input_path / 'rewe_txt_out'
+                else:
+                    output_path = input_path / 'rewe_json_out'
             if input_path.is_dir() and (output_path.is_dir() or not output_path.exists()):
                 # MODIFICATION: Pass preserve_privacy flag
                 process_folder(input_path, output_path, max_workers, rawtext_file, rawtext_stdout, preserve_privacy)
@@ -136,7 +139,10 @@ def main():
             if input_path:
                 if input_path.is_dir():
                     if not output_path:
-                        output_path = input_path / 'rewe_json_out'
+                        if args.rawtext_file:
+                            output_path = input_path / 'rewe_txt_out'
+                        else:
+                            output_path = input_path / 'rewe_json_out'
                     if output_path.is_dir() or not output_path.exists():
                         # MODIFICATION: Pass preserve_privacy flag
                         process_folder(input_path, output_path, max_workers, rawtext_file, rawtext_stdout, preserve_privacy)

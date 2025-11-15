@@ -67,10 +67,9 @@ def process_pdf(pdf_path, output_path=None, rawtext_file=False, rawtext_stdout=F
                     rawtext_path.write_text(raw_text, encoding='utf-8')
                 if rawtext_stdout:
                     print(raw_text)
-                # NOTE: The original function returns here. If you want parsing + raw text, adjust this.
-                # Assuming rawtext flags are for debugging and exclusive of JSON output.
-                # If we proceed, the parsing will happen on the original text, not the anonymized one.
-                # This seems correct for the original feature's intent.
+                
+                if rawtext_file:
+                    return None # Do not proceed to create JSON
                 
             result = parse_ebon(data)
 
