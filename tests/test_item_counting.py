@@ -1,6 +1,6 @@
 import pytest
 from pathlib import Path
-from rewe_ebon_parser.parse import parse_pdf_ebon, parse_ebon
+from rewe_ebon_parser.parse import parse_pdf_ebon, parse_text_ebon
 
 # --- Ground Truth Data ---
 # To add a new test, add a tuple to the appropriate list below.
@@ -17,7 +17,7 @@ PDF_CASES = [
 # This list assumes you have run the CLI tool on the PDFs to generate
 # these corresponding .txt files in the 'eBons_txt_anonymized' folder.
 TXT_CASES = [
-    # ('1.txt', 'txt', 10),
+    ('1.txt', 'txt', 5),
 ]
 
 # Combine all test cases for the parameterizer (gracefully handle undefined lists)
@@ -54,8 +54,7 @@ def test_correct_item_count_from_multiple_sources(filename: str, file_type: str,
     elif file_type == 'txt':
         ebon_path = Path('./examples/eBons_txt_anonymized') / filename
         raw_text = ebon_path.read_text(encoding='utf-8')
-        data_buffer = raw_text.encode('utf-8')
-        parsed_receipt = parse_ebon(data_buffer)
+        parsed_receipt = parse_text_ebon(raw_text)
 
     else:
         pytest.fail(f"Unsupported file type '{file_type}' in test configuration.")
