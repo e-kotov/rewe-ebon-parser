@@ -80,7 +80,7 @@ def parse_ebon(data_buffer: bytes) -> dict:
         )
 
     for line in lines:
-        item_hit = re.match(r'([0-9A-Za-zäöüß &%.!+,\-]*) (-?\d*,\d\d) ([ABC]) ?(\*?)', line)
+        item_hit = re.match(r'([0-9A-Za-zäöüß &%.!+,/\-]*) (-?\d*,\d\d) ([ABC]) ?(\*?)', line)
         if item_hit:
             item = item_hit.group(1)
             price = float(item_hit.group(2).replace(',', '.'))
