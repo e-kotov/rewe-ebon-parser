@@ -72,9 +72,15 @@ def main():
             output_path = input_path.with_suffix('.csv')
         if input_path.is_file():
             if input_path.suffix.lower() == '.pdf':
-                # MODIFICATION: Pass preserve_privacy flag
-                result = process_pdf(input_path, None, rawtext_file, rawtext_stdout, preserve_privacy)
-                dump_items_to_csv([result], output_path)
+                try:
+                    # MODIFICATION: Pass preserve_privacy flag
+                    result = process_pdf(input_path, None, rawtext_file, rawtext_stdout, preserve_privacy)
+                    if result:
+                        dump_items_to_csv([result], output_path)
+                except ValueError as e:
+                    print(f"Error: Failed to process '{input_path}'.", file=sys.stderr)
+                    print(f"Reason: {e}", file=sys.stderr)
+                    sys.exit(1)
             elif input_path.suffix.lower() == '.json':
                 with open(input_path, 'r', encoding='utf-8') as f:
                     result = json.load(f)
@@ -117,8 +123,13 @@ def main():
             if not output_path:
                 output_path = input_path.with_suffix('.json')
             if input_path.is_file() and (output_path.is_file() or not output_path.exists()):
-                # MODIFICATION: Pass preserve_privacy flag
-                process_pdf(input_path, output_path, rawtext_file, rawtext_stdout, preserve_privacy)
+                try:
+                    # MODIFICATION: Pass preserve_privacy flag
+                    process_pdf(input_path, output_path, rawtext_file, rawtext_stdout, preserve_privacy)
+                except ValueError as e:
+                    print(f"Error: Failed to process '{input_path}'.", file=sys.stderr)
+                    print(f"Reason: {e}", file=sys.stderr)
+                    sys.exit(1)
             else:
                 print("Error: Input and output paths must be files when using --file.")
                 sys.exit(1)
@@ -153,8 +164,13 @@ def main():
                     if not output_path:
                         output_path = input_path.with_suffix('.json')
                     if output_path.is_file() or not output_path.exists():
-                        # MODIFICATION: Pass preserve_privacy flag
-                        process_pdf(input_path, output_path, rawtext_file, rawtext_stdout, preserve_privacy)
+                        try:
+                            # MODIFICATION: Pass preserve_privacy flag
+                            process_pdf(input_path, output_path, rawtext_file, rawtext_stdout, preserve_privacy)
+                        except ValueError as e:
+                            print(f"Error: Failed to process '{input_path}'.", file=sys.stderr)
+                            print(f"Reason: {e}", file=sys.stderr)
+                            sys.exit(1)
                     else:
                         print("Error: Output path should be a file when the input path is a file.")
                         sys.exit(1)
