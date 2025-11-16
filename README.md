@@ -1,8 +1,12 @@
 [![Python package](https://github.com/e-kotov/rewe-ebon-parser/actions/workflows/python-package-test.yml/badge.svg)](https://github.com/e-kotov/rewe-ebon-parser/actions/workflows/python-package-test.yml)
 
+**PyPI**: [https://pypi.org/project/rewe-ebon-parser/](https://pypi.org/project/rewe-ebon-parser/)  
+**Changelog**: [View Full Changelog](CHANGELOG.md)  
+**Releases**: [View Release History on GitHub](https://github.com/e-kotov/rewe-ebon-parser/releases)
+
 # REWE eBon Parser
 
-The REWE eBon Parser is a Python package designed to parse REWE eBons (receipts) from PDF files and convert them into structured JSON format or CSV. The package also provides functionality to output raw text extracted from the PDFs for debugging purposes. This project is a re-write of the the [`rewe-ebon-parser`](https://github.com/webD97/rewe-ebon-parser) TypeScript library, example PDFs are borrowed from the same library.
+The REWE eBon Parser is a Python package designed to parse REWE eBons (receipts) from PDF files and convert them into structured JSON format or CSV. It supports parsing receipts with both the older PAYBACK system and the new REWE Bonus loyalty program. The package also provides functionality to output raw text extracted from the PDFs for debugging purposes. This project is a re-write of the the [`rewe-ebon-parser`](https://github.com/webD97/rewe-ebon-parser) TypeScript library, example PDFs are borrowed from the same library.
 
 ## Features
 
@@ -11,6 +15,7 @@ The REWE eBon Parser is a Python package designed to parse REWE eBons (receipts)
 - Extract and output raw text from PDF files (bascially, the output of the underlying `pdfplumber`).
 - Concurrent processing of multiple PDF files with adjustable threading.
 - Detailed logging of processing results in CSV format.
+- Supports both PAYBACK and the new REWE Bonus loyalty programs.
 
 ## Installation
 
@@ -147,16 +152,100 @@ def process_pdf(pdf_path):
 process_pdf("examples/eBons/1.pdf")
 ```
 
+## Output Format
+
+> **Note: Breaking Changes**
+>
+> To support multiple loyalty programs, the JSON output format has been updated. These changes are breaking for users who rely on the old structure.
+
+The parser now uses a generalized `loyalty` object instead of a hardcoded `payback` object.
+
+### The `loyalty` Object
+
+The top-level `payback` key in the JSON output has been replaced by a `loyalty` key. This new object contains a `program` field (`"PAYBACK"` or `"REWE Bonus"`) and a `details` field with the program-specific data.
+
+**Old PAYBACK Format:**
+
+```json
+{
+  "payback": {
+    "card": "#########9334",
+    "earnedPoints": 19
+  }
+}
+```
+
+**New PAYBACK Format:**
+
+```json
+{
+  "loyalty": {
+    "program": "PAYBACK",
+    "details": {
+      "card": "#########9334",
+      "earnedPoints": 19
+    }
+  }
+}
+```
+
+**New REWE Bonus Format:**
+
+```json
+{
+  "loyalty": {
+    "program": "REWE Bonus",
+    "details": {
+      "earnedCredit": 6.28,
+      "newTotalCredit": 7.26,
+      "usedCoupons": [
+        {
+          "name": "10% auf REWE Bio",
+          "value": 1.53
+        }
+      ]
+    }
+  }
+}
+```
+
+### The `items` Object
+
+Within each item, the boolean `paybackQualified` field has been replaced by a string field named `loyaltyProgramQualified`. This field will contain the name of the loyalty program (`"PAYBACK"` or `"REWE Bonus"`) if the item qualifies, or it will be `null` if it does not.
+
+**Old Item Format:**
+
+```json
+{
+  "name": "SALAMI SPITZENQ.",
+  "paybackQualified": true
+}
+```
+
+**New Item Format:**
+
+```json
+{
+  "name": "SALAMI SPITZENQ.",
+  "loyaltyProgramQualified": "PAYBACK"
+}
+```
+
 
 ## License
 
-This project is licensed under the MIT License. For details see [LICENSE](LICENSE) file.
+This project is licensed under the MIT License. For details, see the [LICENSE](LICENSE) file.
+
+## Changelog
+
+For a detailed history of changes, see the [CHANGELOG.md](CHANGELOG.md) file.
 
 
 ## Caveats
 
-So far the module reliably parses the items, but sometimes fails on PAYBACK points, as these are often presented differently in REWE receipts.
+While the parser is tested against several receipt formats, REWE occasionally updates the layout of their eBons. A new or unusual layout might cause parsing errors, especially in the loyalty program section.
 
 ## Future Work
 
-- Fix bugs with occasional parsing failures in datetime and PAYBACK points.
+- Continue to improve the robustness of coupon parsing for both loyalty programs.
+- Add handling for more edge cases and receipt variations as they are discovered.

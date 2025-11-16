@@ -44,12 +44,18 @@ def test_csv_table_cli(tmp_path, examples_ebons_dir, monkeypatch):
         assert first_row['subTotal']
         assert first_row['amount']
         assert first_row['taxCategory']
-        assert first_row['loyaltyProgramQualified']
+        assert first_row['loyaltyProgramQualified'] in ('', 'PAYBACK', 'REWE Bonus')
 
         # Ensure no fields are missing
         for row in rows:
             for field in expected_fields:
                 assert field in row
+
+        # Loyalty program column should contain names instead of boolean strings
+        loyalty_values = [row['loyaltyProgramQualified'] for row in rows]
+        assert 'True' not in loyalty_values
+        assert 'False' not in loyalty_values
+        assert any(value for value in loyalty_values)
 
 def test_csv_table_cli_with_mixed_files(tmp_path, examples_ebons_dir, monkeypatch):
     # Path to save the CSV file
