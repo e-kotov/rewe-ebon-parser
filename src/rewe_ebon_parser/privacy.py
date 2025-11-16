@@ -29,8 +29,9 @@ def anonymize_text_content(text: str) -> str:
     text = re.sub(r'^\d{2}\.\d{2}\.\d{4} \d{2}:\d{2} Bon-Nr\.:\d+\n', 'DD.MM.YYYY HH:MM Bon-Nr.: [REDACTED]\n', text, flags=re.MULTILINE)
     text = re.sub(r'^Markt:.* Kasse:.* Bed\.:.*\n', 'Markt: [REDACTED] Kasse: [REDACTED] Bed.: [REDACTED]\n', text, flags=re.MULTILINE)
 
-    # Redact all PAYBACK and Bonus Coupon information in the footer
-    text = re.sub(r'(?s)Deine REWE PAYBACK Vorteile heute.*?(?=REWE Markt GmbH)', '[PAYBACK & COUPON DATA REDACTED]\n', text)
+    # Redact all loyalty program blocks in the footer
+    loyalty_pattern = r'(?s)(Deine REWE PAYBACK Vorteile heute|Deine REWE Bonus-Vorteile heute).*?(?=REWE Markt GmbH)'
+    text = re.sub(loyalty_pattern, '[LOYALTY PROGRAM DATA REDACTED]\n', text)
 
     return text
 
@@ -63,9 +64,9 @@ def anonymize_receipt_dict(receipt_dict: Dict) -> Dict:
             'city': "[REDACTED]"
         }
 
-    # Remove payback data entirely
-    if 'payback' in receipt_dict:
-        receipt_dict['payback'] = None
+    # Remove loyalty data entirely
+    if 'loyalty' in receipt_dict:
+        receipt_dict['loyalty'] = None
 
     # Remove keys that became None
     receipt_dict = {k: v for k, v in receipt_dict.items() if v is not None}

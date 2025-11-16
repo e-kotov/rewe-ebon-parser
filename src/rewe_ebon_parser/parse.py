@@ -8,7 +8,19 @@ import io
 import math
 import pytz
 from collections import OrderedDict
-from .classes import *
+from .classes import (
+    LoyaltyData,
+    MarketAddress,
+    Payment,
+    PaybackCoupon,
+    PaybackDetails,
+    REWEBonusCoupon,
+    REWEBonusDetails,
+    Receipt,
+    ReceiptItem,
+    TaxDetails,
+    TaxDetailsEntry,
+)
 
 def _parse_date(line: str) -> Optional[datetime]:
     """
@@ -65,6 +77,16 @@ def parse_ebon(data_buffer: bytes) -> dict:
 
     lines = list(filter(None, map(str.strip, data_text.replace('  ', ' ').split('\n'))))
 
+    detected_loyalty_program = None
+    # Pre-scan for loyalty program so items can be labeled correctly
+    for line in lines:
+        if 'Deine REWE PAYBACK Vorteile' in line:
+            detected_loyalty_program = "PAYBACK"
+            break
+        if 'Deine REWE Bonus-Vorteile' in line:
+            detected_loyalty_program = "REWE Bonus"
+            break
+
     date = None
     market = '?'
     market_address = None
@@ -81,6 +103,10 @@ def parse_ebon(data_buffer: bytes) -> dict:
     payback_revenue = float('nan')
     payback_card_number = '?'
     payback_coupons = []
+    rewe_bonus_earned_credit = None
+    rewe_bonus_used_credit = None
+    rewe_bonus_new_total_credit = None
+    rewe_bonus_coupons = []
     used_rewe_credit = float('nan')
     new_rewe_credit = float('nan')
     tax_details_total = TaxDetailsEntry(float('nan'), float('nan'), float('nan'), float('nan'))
@@ -131,14 +157,14 @@ def parse_ebon(data_buffer: bytes) -> dict:
             item = item_hit.group(1)
             price = float(item_hit.group(2).replace(',', '.'))
             category = item_hit.group(3)
-            payback_qualified = not item_hit.group(4) and price > 0
+            loyalty_program_qualified = detected_loyalty_program if (not item_hit.group(4) and price > 0) else None
 
             items.append(ReceiptItem(
                 tax_category=category,
                 name=item,
                 sub_total=price,
-                payback_qualified=payback_qualified,
-                amount=1
+                amount=1,
+                loyalty_program_qualified=loyalty_program_qualified
             ))
             return True
 
@@ -172,6 +198,8 @@ def parse_ebon(data_buffer: bytes) -> dict:
         nonlocal payback_card_number, payback_points_before, payback_points, payback_revenue
         nonlocal tax_details_total, tax_details_A, tax_details_B, tax_details_C
         nonlocal used_rewe_credit, new_rewe_credit
+        nonlocal rewe_bonus_earned_credit, rewe_bonus_used_credit, rewe_bonus_new_total_credit
+
         total_hit = re.match(r'SUMME EUR (-?\d*,\d\d)', line)
         if total_hit:
             total = float(total_hit.group(1).replace(',', '.'))
@@ -247,6 +275,32 @@ def parse_ebon(data_buffer: bytes) -> dict:
                 points=int(payback_coupon_match.group(2).replace('.', ''))
             ))
             return True
+
+        if detected_loyalty_program == "REWE Bonus":
+            earned_credit_match = re.match(r'Mit diesem Einkauf hast du ([0-9.,]+) EUR', line)
+            if earned_credit_match:
+                rewe_bonus_earned_credit = float(earned_credit_match.group(1).replace('.', '').replace(',', '.'))
+                return True
+
+            used_bonus_credit_match = re.match(r'Eingesetztes Bonus-Guthaben: ([0-9.,]+) EUR', line)
+            if used_bonus_credit_match:
+                rewe_bonus_used_credit = float(used_bonus_credit_match.group(1).replace('.', '').replace(',', '.'))
+                return True
+
+            new_total_credit_match = re.match(r'Aktuelles Bonus-Guthaben: ([0-9.,]+) EUR', line)
+            if new_total_credit_match:
+                rewe_bonus_new_total_credit = float(new_total_credit_match.group(1).replace('.', '').replace(',', '.'))
+                return True
+
+            rewe_bonus_coupon_match = re.match(r'(.*) ([0-9.,]+) EUR', line)
+            if rewe_bonus_coupon_match and 'Bonus-Guthaben' not in line and 'Mit diesem Einkauf' not in line:
+                coupon_name = rewe_bonus_coupon_match.group(1).strip()
+                if coupon_name:
+                    rewe_bonus_coupons.append(REWEBonusCoupon(
+                        name=coupon_name,
+                        value=float(rewe_bonus_coupon_match.group(2).replace('.', '').replace(',', '.'))
+                    ))
+                    return True
 
         tax_details_match = re.match(r'([ABC])= ([0-9,]*)% ([0-9,]*) ([0-9,]*) ([0-9,]*)', line)
         if tax_details_match:
@@ -313,7 +367,27 @@ def parse_ebon(data_buffer: bytes) -> dict:
     if round(real_total_in_cents, 2) != round(total_in_cents, 2):
         raise ValueError(f"Something went wrong when parsing the eBon: The eBon states a total sum of {total_in_cents} but the parser only found items worth {real_total_in_cents}.")
 
-    qualified_revenue = payback_revenue if not math.isnan(payback_revenue) else sum(item.sub_total for item in items if item.payback_qualified or item.sub_total < 0)
+    loyalty_data = None
+    if detected_loyalty_program == "PAYBACK" and payback_card_number != '?':
+        qualified_revenue = payback_revenue if not math.isnan(payback_revenue) else sum(item.sub_total for item in items if item.loyalty_program_qualified or item.sub_total < 0)
+        payback_details = PaybackDetails(
+            card=payback_card_number,
+            points_before=payback_points_before,
+            earned_points=payback_points,
+            used_coupons=payback_coupons,
+            used_rewe_credit=used_rewe_credit if not math.isnan(used_rewe_credit) else None,
+            new_rewe_credit=new_rewe_credit if not math.isnan(new_rewe_credit) else None,
+            payback_revenue=qualified_revenue
+        )
+        loyalty_data = LoyaltyData(program="PAYBACK", details=payback_details)
+    elif detected_loyalty_program == "REWE Bonus" and rewe_bonus_earned_credit is not None:
+        rewe_bonus_details = REWEBonusDetails(
+            earned_credit=rewe_bonus_earned_credit,
+            used_credit=rewe_bonus_used_credit,
+            new_total_credit=rewe_bonus_new_total_credit,
+            used_coupons=rewe_bonus_coupons
+        )
+        loyalty_data = LoyaltyData(program="REWE Bonus", details=rewe_bonus_details)
 
     receipt = Receipt(
         date=date,
@@ -327,15 +401,7 @@ def parse_ebon(data_buffer: bytes) -> dict:
         given=given,
         change=change if not math.isnan(change) else None,
         payout=payout if not math.isnan(payout) else None,
-        payback=PaybackData(
-            card=payback_card_number,
-            points_before=payback_points_before,
-            earned_points=payback_points,
-            used_coupons=payback_coupons,
-            used_rewe_credit=used_rewe_credit if not math.isnan(used_rewe_credit) else None,
-            new_rewe_credit=new_rewe_credit if not math.isnan(new_rewe_credit) else None,
-            payback_revenue=qualified_revenue
-        ) if payback_card_number != '?' else None,
+        loyalty=loyalty_data,
         tax_details=TaxDetails(
                 total=tax_details_total,
                 A=tax_details_A,
@@ -359,7 +425,7 @@ def parse_ebon(data_buffer: bytes) -> dict:
         ('given', receipt_dict.get('given')),
         ('change', receipt_dict.get('change')),
         ('payout', receipt_dict.get('payout')),
-        ('payback', receipt_dict.get('payback')),
+        ('loyalty', receipt_dict.get('loyalty')),
         ('taxDetails', receipt_dict.get('taxDetails')),
     ])
 
@@ -382,6 +448,16 @@ def parse_text_ebon(text: str) -> dict:
 
     lines = list(filter(None, map(str.strip, data_text.replace('  ', ' ').split('\n'))))
 
+    detected_loyalty_program = None
+    # Pre-scan for loyalty program so items can be labeled correctly
+    for line in lines:
+        if 'Deine REWE PAYBACK Vorteile' in line:
+            detected_loyalty_program = "PAYBACK"
+            break
+        if 'Deine REWE Bonus-Vorteile' in line:
+            detected_loyalty_program = "REWE Bonus"
+            break
+
     date = None
     market = '?'
     market_address = None
@@ -398,6 +474,10 @@ def parse_text_ebon(text: str) -> dict:
     payback_revenue = float('nan')
     payback_card_number = '?'
     payback_coupons = []
+    rewe_bonus_earned_credit = None
+    rewe_bonus_used_credit = None
+    rewe_bonus_new_total_credit = None
+    rewe_bonus_coupons = []
     used_rewe_credit = float('nan')
     new_rewe_credit = float('nan')
     tax_details_total = TaxDetailsEntry(float('nan'), float('nan'), float('nan'), float('nan'))
@@ -447,14 +527,14 @@ def parse_text_ebon(text: str) -> dict:
             item = item_hit.group(1)
             price = float(item_hit.group(2).replace(',', '.'))
             category = item_hit.group(3)
-            payback_qualified = not item_hit.group(4) and price > 0
+            loyalty_program_qualified = detected_loyalty_program if (not item_hit.group(4) and price > 0) else None
 
             items.append(ReceiptItem(
                 tax_category=category,
                 name=item,
                 sub_total=price,
-                payback_qualified=payback_qualified,
-                amount=1
+                amount=1,
+                loyalty_program_qualified=loyalty_program_qualified
             ))
             return True
 
@@ -488,6 +568,7 @@ def parse_text_ebon(text: str) -> dict:
         nonlocal payback_card_number, payback_points_before, payback_points, payback_revenue
         nonlocal tax_details_total, tax_details_A, tax_details_B, tax_details_C
         nonlocal used_rewe_credit, new_rewe_credit
+        nonlocal rewe_bonus_earned_credit, rewe_bonus_used_credit, rewe_bonus_new_total_credit
 
         total_hit = re.match(r'SUMME EUR (-?\d*,\d\d)', line)
         if total_hit:
@@ -564,6 +645,32 @@ def parse_text_ebon(text: str) -> dict:
                 points=int(payback_coupon_match.group(2).replace('.', ''))
             ))
             return True
+
+        if detected_loyalty_program == "REWE Bonus":
+            earned_credit_match = re.match(r'Mit diesem Einkauf hast du ([0-9.,]+) EUR', line)
+            if earned_credit_match:
+                rewe_bonus_earned_credit = float(earned_credit_match.group(1).replace('.', '').replace(',', '.'))
+                return True
+
+            used_bonus_credit_match = re.match(r'Eingesetztes Bonus-Guthaben: ([0-9.,]+) EUR', line)
+            if used_bonus_credit_match:
+                rewe_bonus_used_credit = float(used_bonus_credit_match.group(1).replace('.', '').replace(',', '.'))
+                return True
+
+            new_total_credit_match = re.match(r'Aktuelles Bonus-Guthaben: ([0-9.,]+) EUR', line)
+            if new_total_credit_match:
+                rewe_bonus_new_total_credit = float(new_total_credit_match.group(1).replace('.', '').replace(',', '.'))
+                return True
+
+            rewe_bonus_coupon_match = re.match(r'(.*) ([0-9.,]+) EUR', line)
+            if rewe_bonus_coupon_match and 'Bonus-Guthaben' not in line and 'Mit diesem Einkauf' not in line:
+                coupon_name = rewe_bonus_coupon_match.group(1).strip()
+                if coupon_name:
+                    rewe_bonus_coupons.append(REWEBonusCoupon(
+                        name=coupon_name,
+                        value=float(rewe_bonus_coupon_match.group(2).replace('.', '').replace(',', '.'))
+                    ))
+                    return True
 
         tax_details_match = re.match(r'([ABC])= ([0-9,]*)% ([0-9,]*) ([0-9,]*) ([0-9,]*)', line)
         if tax_details_match:
@@ -635,7 +742,28 @@ def parse_text_ebon(text: str) -> dict:
     # Validate that the sum of item sub_totals equals the receipt's total sum.
     if not math.isnan(total) and round(real_total_in_cents, 2) != round(total_in_cents, 2):
         raise ValueError(f"Something went wrong when parsing the eBon: The eBon states a total sum of {total:.2f} but the parser only found items worth {real_total_in_cents / 100:.2f}.")
-    qualified_revenue = payback_revenue if not math.isnan(payback_revenue) else sum(item.sub_total for item in items if item.payback_qualified or item.sub_total < 0)
+
+    loyalty_data = None
+    if detected_loyalty_program == "PAYBACK" and payback_card_number != '?':
+        qualified_revenue = payback_revenue if not math.isnan(payback_revenue) else sum(item.sub_total for item in items if item.loyalty_program_qualified or item.sub_total < 0)
+        payback_details = PaybackDetails(
+            card=payback_card_number,
+            points_before=payback_points_before,
+            earned_points=payback_points,
+            used_coupons=payback_coupons,
+            used_rewe_credit=used_rewe_credit if not math.isnan(used_rewe_credit) else None,
+            new_rewe_credit=new_rewe_credit if not math.isnan(new_rewe_credit) else None,
+            payback_revenue=qualified_revenue
+        )
+        loyalty_data = LoyaltyData(program="PAYBACK", details=payback_details)
+    elif detected_loyalty_program == "REWE Bonus" and rewe_bonus_earned_credit is not None:
+        rewe_bonus_details = REWEBonusDetails(
+            earned_credit=rewe_bonus_earned_credit,
+            used_credit=rewe_bonus_used_credit,
+            new_total_credit=rewe_bonus_new_total_credit,
+            used_coupons=rewe_bonus_coupons
+        )
+        loyalty_data = LoyaltyData(program="REWE Bonus", details=rewe_bonus_details)
 
     receipt = Receipt(
         date=date,
@@ -649,15 +777,7 @@ def parse_text_ebon(text: str) -> dict:
         given=given,
         change=change if not math.isnan(change) else None,
         payout=payout if not math.isnan(payout) else None,
-        payback=PaybackData(
-            card=payback_card_number,
-            points_before=payback_points_before,
-            earned_points=payback_points,
-            used_coupons=payback_coupons,
-            used_rewe_credit=used_rewe_credit if not math.isnan(used_rewe_credit) else None,
-            new_rewe_credit=new_rewe_credit if not math.isnan(new_rewe_credit) else None,
-            payback_revenue=qualified_revenue
-        ) if payback_card_number != '?' else None,
+        loyalty=loyalty_data,
         tax_details=TaxDetails(
                 total=tax_details_total,
                 A=tax_details_A,
@@ -681,7 +801,7 @@ def parse_text_ebon(text: str) -> dict:
         ('given', receipt_dict.get('given')),
         ('change', receipt_dict.get('change')),
         ('payout', receipt_dict.get('payout')),
-        ('payback', receipt_dict.get('payback')),
+        ('loyalty', receipt_dict.get('loyalty')),
         ('taxDetails', receipt_dict.get('taxDetails')),
     ])
 

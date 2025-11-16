@@ -34,22 +34,35 @@ def test_csv_table_cli(tmp_path, examples_ebons_dir, monkeypatch):
         # Ensure some rows are present
         assert len(rows) > 0
         
-        expected_fields = ['datetime_local', 'name', 'subTotal', 'amount', 'pricePerUnit', 'unit', 'taxCategory', 'paybackQualified']
+        expected_fields = [
+            'datetime_local', 'market', 'marketStreet', 'marketZip', 'marketCity',
+            'name', 'subTotal', 'amount', 'pricePerUnit', 'unit', 'taxCategory', 'loyaltyProgramQualified'
+        ]
         assert reader.fieldnames == expected_fields
         
         # Check some values in the first row as an example
         first_row = rows[0]
         assert first_row['datetime_local']
+        assert first_row['market']
+        assert first_row['marketStreet']
+        assert first_row['marketZip']
+        assert first_row['marketCity']
         assert first_row['name']
         assert first_row['subTotal']
         assert first_row['amount']
         assert first_row['taxCategory']
-        assert first_row['paybackQualified']
+        assert first_row['loyaltyProgramQualified'] in ('', 'PAYBACK', 'REWE Bonus')
 
         # Ensure no fields are missing
         for row in rows:
             for field in expected_fields:
                 assert field in row
+
+        # Loyalty program column should contain names instead of boolean strings
+        loyalty_values = [row['loyaltyProgramQualified'] for row in rows]
+        assert 'True' not in loyalty_values
+        assert 'False' not in loyalty_values
+        assert any(value for value in loyalty_values)
 
 def test_csv_table_cli_with_mixed_files(tmp_path, examples_ebons_dir, monkeypatch):
     # Path to save the CSV file

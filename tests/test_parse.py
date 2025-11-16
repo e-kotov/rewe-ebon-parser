@@ -35,7 +35,7 @@ def test_correctly_identifies_item_1(example_ebon):
     item = example_ebon['items'][0]
     assert item['name'] == 'SALAMI SPITZENQ.'
     assert item['amount'] == 1
-    assert item['paybackQualified'] is True
+    assert item['loyaltyProgramQualified'] == 'PAYBACK'
     assert item.get('pricePerUnit') is None
     assert item['taxCategory'] == 'B'
     assert item.get('unit') is None
@@ -45,7 +45,7 @@ def test_correctly_identifies_item_7(example_ebon):
     item = example_ebon['items'][6]
     assert item['name'] == 'BAG. SPECIALE'
     assert item['amount'] == 2
-    assert item['paybackQualified'] is True
+    assert item['loyaltyProgramQualified'] == 'PAYBACK'
     assert item['pricePerUnit'] == pytest.approx(2.29)
     assert item['taxCategory'] == 'B'
     assert item['unit'] == 'Stk'
@@ -54,7 +54,7 @@ def test_correctly_identifies_item_7(example_ebon):
 def test_correctly_identifies_item_17(example_ebon):
     item = example_ebon['items'][16]
     assert item['name'] == 'Mitarbeiterrabatt 5%'
-    assert item['paybackQualified'] is False
+    assert item['loyaltyProgramQualified'] is None
     assert item['taxCategory'] == 'A'
     assert item['subTotal'] == pytest.approx(-0.29)
 
@@ -64,17 +64,20 @@ def test_payout_is_undefined(example_ebon):
 def test_correct_total(example_ebon):
     assert example_ebon['total'] == pytest.approx(39.44)
 
-def test_correct_payback_info(example_ebon):
-    payback = example_ebon.get('payback', {})
-    assert payback['card'] == '#########9334'
-    assert payback['basePoints'] == 19
-    assert payback['couponPoints'] == 0
-    assert payback['earnedPoints'] == 19
-    assert payback['pointsBefore'] == 7638
-    assert payback['qualifiedRevenue'] == pytest.approx(39.44)
-    assert payback['usedCoupons'] == []
-    assert payback.get('usedREWECredit') is None
-    assert payback.get('newREWECredit') is None
+def test_correct_loyalty_info(example_ebon):
+    loyalty = example_ebon.get('loyalty', {})
+    assert loyalty['program'] == 'PAYBACK'
+
+    details = loyalty.get('details', {})
+    assert details['card'] == '#########9334'
+    assert details['basePoints'] == 19
+    assert details['couponPoints'] == 0
+    assert details['earnedPoints'] == 19
+    assert details['pointsBefore'] == 7638
+    assert details['qualifiedRevenue'] == pytest.approx(39.44)
+    assert details['usedCoupons'] == []
+    assert details.get('usedREWECredit') is None
+    assert details.get('newREWECredit') is None
 
 def test_correct_given_money(example_ebon):
     assert len(example_ebon['given']) == 2

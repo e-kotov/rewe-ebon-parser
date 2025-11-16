@@ -1,7 +1,7 @@
 # src/rewe_ebon_parser/classes.py
 import math
 from datetime import datetime
-from typing import List, Optional
+from typing import List, Optional, Union
 import pytz
 
 class TaxCategory:
@@ -53,19 +53,19 @@ class ReceiptItem:
         tax_category (str): The tax category of the item.
         name (str): The name of the item.
         sub_total (float): The subtotal of the item.
-        payback_qualified (bool): Whether the item qualifies for payback points.
+        loyalty_program_qualified (Optional[str]): Name of the qualifying loyalty program if applicable.
         amount (float): The amount of the item.
         unit (Optional[str]): The unit of the item.
         price_per_unit (Optional[float]): The price per unit of the item.
     """
-    def __init__(self, tax_category: str, name: str, sub_total: float, payback_qualified: bool, amount: float, unit: Optional[str] = None, price_per_unit: Optional[float] = None):
+    def __init__(self, tax_category: str, name: str, sub_total: float, amount: float, unit: Optional[str] = None, price_per_unit: Optional[float] = None, loyalty_program_qualified: Optional[str] = None):
         self.tax_category = tax_category
         self.name = name
         self.sub_total = sub_total
-        self.payback_qualified = payback_qualified
         self.amount = amount
         self.unit = unit
         self.price_per_unit = price_per_unit
+        self.loyalty_program_qualified = loyalty_program_qualified
     
     def to_dict(self):
         """
@@ -79,7 +79,7 @@ class ReceiptItem:
             'name': self.name,
             'amount': self.amount,
             'subTotal': self.sub_total,
-            'paybackQualified': self.payback_qualified
+            'loyaltyProgramQualified': self.loyalty_program_qualified
         }
         if self.unit is not None:
             data['unit'] = self.unit
@@ -201,9 +201,9 @@ class PaybackCoupon:
             'points': self.points
         }
 
-class PaybackData:
+class PaybackDetails:
     """
-    Represents payback data for a receipt.
+    Represents payback-specific loyalty details for a receipt.
 
     Attributes:
         card (str): The payback card number.
@@ -255,10 +255,10 @@ class PaybackData:
     
     def to_dict(self):
         """
-        Converts the PaybackData instance to a dictionary.
+        Converts the PaybackDetails instance to a dictionary.
 
         Returns:
-            dict: A dictionary representation of the PaybackData instance.
+            dict: A dictionary representation of the PaybackDetails instance.
         """
         data = {
             'card': self.card,
@@ -274,6 +274,52 @@ class PaybackData:
         if self.new_rewe_credit is not None:
             data['newREWECredit'] = self.new_rewe_credit
         return data
+
+class REWEBonusCoupon:
+    """Represents a coupon redeemed within the REWE Bonus program."""
+
+    def __init__(self, name: str, value: float):
+        self.name = name
+        self.value = value
+
+    def to_dict(self):
+        return {
+            'name': self.name,
+            'value': self.value
+        }
+
+class REWEBonusDetails:
+    """Holds REWE Bonus loyalty data for a receipt."""
+
+    def __init__(self, earned_credit: float, used_credit: Optional[float], new_total_credit: Optional[float], used_coupons: List[REWEBonusCoupon]):
+        self.earned_credit = earned_credit
+        self.used_credit = used_credit
+        self.new_total_credit = new_total_credit
+        self.used_coupons = used_coupons
+
+    def to_dict(self):
+        data = {
+            'earnedCredit': self.earned_credit,
+            'usedCoupons': [coupon.to_dict() for coupon in self.used_coupons]
+        }
+        if self.used_credit is not None:
+            data['usedCredit'] = self.used_credit
+        if self.new_total_credit is not None:
+            data['newTotalCredit'] = self.new_total_credit
+        return data
+
+class LoyaltyData:
+    """Generic container describing which loyalty program is associated with the receipt."""
+
+    def __init__(self, program: str, details: Union[PaybackDetails, REWEBonusDetails]):
+        self.program = program
+        self.details = details
+
+    def to_dict(self):
+        return {
+            'program': self.program,
+            'details': self.details.to_dict()
+        }
 
 class Receipt:
     """
@@ -291,10 +337,10 @@ class Receipt:
         given (List[Payment]): The given payments.
         change (Optional[float]): The change returned.
         payout (Optional[float]): The payout amount.
-        payback (Optional[PaybackData]): The payback data.
+        loyalty (Optional[LoyaltyData]): Loyalty program data for the receipt.
         tax_details (TaxDetails): The tax details.
     """
-    def __init__(self, date: datetime, market: str, market_address: Optional[MarketAddress], cashier: str, checkout: str, vatin: str, items: List[ReceiptItem], total: float, given: List[Payment], change: Optional[float], payout: Optional[float], payback: Optional[PaybackData], tax_details: TaxDetails):
+    def __init__(self, date: datetime, market: str, market_address: Optional[MarketAddress], cashier: str, checkout: str, vatin: str, items: List[ReceiptItem], total: float, given: List[Payment], change: Optional[float], payout: Optional[float], loyalty: Optional[LoyaltyData], tax_details: TaxDetails):
         self.date = date
         self.market = market
         self.market_address = market_address
@@ -306,7 +352,7 @@ class Receipt:
         self.given = given
         self.change = change
         self.payout = payout
-        self.payback = payback
+        self.loyalty = loyalty
         self.tax_details = tax_details
     
     def to_dict(self):
@@ -331,8 +377,8 @@ class Receipt:
         }
         if self.change is not None:
             data['change'] = self.change
-        if self.payback is not None:
-            data['payback'] = self.payback.to_dict()
+        if self.loyalty is not None:
+            data['loyalty'] = self.loyalty.to_dict()
         if self.payout is not None:
             data['payout'] = self.payout
         return data
