@@ -27,7 +27,7 @@ jobs:
 
       # This action installs the Quarto CLI
       - name: Set up Quarto
-        uses: quarto-dev/quarto-cli-action@v2
+        uses: quarto-dev/quarto-actions/setup@v2
 
       - name: Install Python dependencies
         run: |
