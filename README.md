@@ -111,6 +111,15 @@ rewe-ebon-parser examples/eBons/ --csv-table
 - `--version`: show module version.
 - `-h`, `--help`: show help.
 
+#### CSV Table Columns
+
+When `--csv-table` is used, each row in the exported CSV contains:
+- `datetime_local`: Localized timestamp of the receipt.
+- `market`: REWE market identifier (store number).
+- `marketStreet`, `marketZip`, `marketCity`: Address of the market from `marketAddress` in the JSON output.
+- `name`, `subTotal`, `amount`, `pricePerUnit`, `unit`, `taxCategory`: Item-level data from the parsed receipt.
+- `loyaltyProgramQualified`: Name of the qualifying loyalty program for the item or empty if not qualified.
+
 #### Auto-detection Mode
 
 If neither `--file` nor `--folder` is specified, the script will automatically detect if the input path is a file or a folder and process accordingly.

@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support for parsing the new **REWE Bonus** loyalty program, including earned credit and value-based coupons.
 - New test suite to validate REWE Bonus parsing logic.
 - The `loyaltyProgramQualified` column in CSV table exports now holds the loyalty program name (or is empty when the item is not qualified).
+- CSV exports now include `market`, `marketStreet`, `marketZip`, and `marketCity` columns so each row carries its originating store information.
 
 
 ### Changed

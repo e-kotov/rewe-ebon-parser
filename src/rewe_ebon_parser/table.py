@@ -14,14 +14,21 @@ def dump_items_to_csv(parsed_receipts: List[Dict], output_path: Path):
     """
     items = []
     for receipt in parsed_receipts:
+        market_address = receipt.get('marketAddress') or {}
         for item in receipt['items']:
-            item['datetime_local'] = receipt['datetime_local']
+            # Attach receipt-level metadata used in the CSV table.
+            item['datetime_local'] = receipt.get('datetime_local')
+            item['market'] = receipt.get('market')
+            item['marketStreet'] = market_address.get('street')
+            item['marketZip'] = market_address.get('zip')
+            item['marketCity'] = market_address.get('city')
             items.append(item)
 
     if items:
         # Define the desired field order
         fieldnames = [
-            'datetime_local', 'name', 'subTotal', 'amount', 
+            'datetime_local', 'market', 'marketStreet', 'marketZip', 'marketCity',
+            'name', 'subTotal', 'amount', 
             'pricePerUnit', 'unit', 'taxCategory', 'loyaltyProgramQualified'
         ]
 

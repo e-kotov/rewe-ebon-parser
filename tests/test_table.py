@@ -34,12 +34,19 @@ def test_csv_table_cli(tmp_path, examples_ebons_dir, monkeypatch):
         # Ensure some rows are present
         assert len(rows) > 0
         
-        expected_fields = ['datetime_local', 'name', 'subTotal', 'amount', 'pricePerUnit', 'unit', 'taxCategory', 'loyaltyProgramQualified']
+        expected_fields = [
+            'datetime_local', 'market', 'marketStreet', 'marketZip', 'marketCity',
+            'name', 'subTotal', 'amount', 'pricePerUnit', 'unit', 'taxCategory', 'loyaltyProgramQualified'
+        ]
         assert reader.fieldnames == expected_fields
         
         # Check some values in the first row as an example
         first_row = rows[0]
         assert first_row['datetime_local']
+        assert first_row['market']
+        assert first_row['marketStreet']
+        assert first_row['marketZip']
+        assert first_row['marketCity']
         assert first_row['name']
         assert first_row['subTotal']
         assert first_row['amount']
