@@ -32,10 +32,18 @@ jobs:
       - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install .[docs]
+          pip install .
+
+      - name: Generate CLI help text
+        run: |
+          echo '```sh' > _cli-help.md
+          rewe-ebon-parser --help >> _cli-help.md
+          echo '```' >> _cli-help.md
 
       - name: Build documentation
         run: |
+          # The API reference needs quartodoc to be installed from the docs extra
+          pip install .[docs]
           quartodoc build
           quarto render
 
