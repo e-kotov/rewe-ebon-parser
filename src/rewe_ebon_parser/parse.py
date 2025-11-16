@@ -10,6 +10,31 @@ import pytz
 from collections import OrderedDict
 from .classes import *
 
+def _parse_date(line: str) -> Optional[datetime]:
+    """
+    Parse date from a line of text.
+
+    Args:
+        line (str): The line of text.
+
+    Returns:
+        Optional[datetime]: The parsed date or None.
+    """
+    timestamp_hit = re.search(r'(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}) Bon-Nr\.:', line)
+    if timestamp_hit:
+        date = datetime(
+            year=int(timestamp_hit.group(3)),
+            month=int(timestamp_hit.group(2)),
+            day=int(timestamp_hit.group(1)),
+            hour=int(timestamp_hit.group(4)),
+            minute=int(timestamp_hit.group(5)),
+            second=0
+        )
+        local_tz = pytz.timezone('Europe/Berlin')
+        date = local_tz.localize(date)
+        return date
+    return None
+
 def extract_raw_text(data_buffer: bytes) -> str:
     """
     Extract raw text from a PDF data buffer.
@@ -142,18 +167,9 @@ def parse_ebon(data_buffer: bytes) -> dict:
             payout = float(payout_match.group(1).replace(',', '.'))
             continue
 
-        timestamp_hit = re.match(r'(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}) Bon-Nr\.:.*', line)
-        if timestamp_hit:
-            date = datetime(
-                year=int(timestamp_hit.group(3)),
-                month=int(timestamp_hit.group(2)),
-                day=int(timestamp_hit.group(1)),
-                hour=int(timestamp_hit.group(4)),
-                minute=int(timestamp_hit.group(5)),
-                second=0
-            )
-            local_tz = pytz.timezone('Europe/Berlin')
-            date = local_tz.localize(date)
+        parsed_date = _parse_date(line)
+        if parsed_date:
+            date = parsed_date
             continue
 
         markt_match = re.match(r'Markt:(.*) Kasse:(.*) Bed\.:(.*)', line)
@@ -419,18 +435,9 @@ def parse_text_ebon(text: str) -> dict:
             payout = float(payout_match.group(1).replace(',', '.'))
             continue
 
-        timestamp_hit = re.match(r'(\d{2})\.(\d{2})\.(\d{4}) (\d{2}):(\d{2}) Bon-Nr\.:.*', line)
-        if timestamp_hit:
-            date = datetime(
-                year=int(timestamp_hit.group(3)),
-                month=int(timestamp_hit.group(2)),
-                day=int(timestamp_hit.group(1)),
-                hour=int(timestamp_hit.group(4)),
-                minute=int(timestamp_hit.group(5)),
-                second=0
-            )
-            local_tz = pytz.timezone('Europe/Berlin')
-            date = local_tz.localize(date)
+        parsed_date = _parse_date(line)
+        if parsed_date:
+            date = parsed_date
             continue
 
         markt_match = re.match(r'Markt:(.*) Kasse:(.*) Bed\.:(.*)', line)

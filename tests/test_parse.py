@@ -1,6 +1,6 @@
 import pytest
 from datetime import datetime
-from rewe_ebon_parser.parse import parse_pdf_ebon
+from rewe_ebon_parser.parse import parse_pdf_ebon, parse_text_ebon
 
 @pytest.fixture(scope="module")
 def example_ebon():
