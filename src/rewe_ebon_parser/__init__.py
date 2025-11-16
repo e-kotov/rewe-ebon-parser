@@ -2,4 +2,27 @@
 
 __version__ = "0.0.7"
 
+from .classes import (
+    LoyaltyData,
+    MarketAddress,
+    Payment,
+    PaybackDetails,
+    REWEBonusDetails,
+    Receipt,
+    ReceiptItem,
+    TaxDetails,
+)
 from .parse import parse_ebon, parse_pdf_ebon
+
+__all__ = [
+    "parse_ebon",
+    "parse_pdf_ebon",
+    "Receipt",
+    "ReceiptItem",
+    "LoyaltyData",
+    "MarketAddress",
+    "Payment",
+    "TaxDetails",
+    "PaybackDetails",
+    "REWEBonusDetails",
+]
