@@ -16,20 +16,9 @@ rewe-ebon-parser [--file | --folder] <input_path> [output_path] [OPTIONS]
 
 ## Arguments
 
-| Flag | Description |
-| --- | --- |
-| `input_path` | PDF or directory containing PDFs/JSON exports. Optional if you only need the help output. |
-| `output_path` | Destination JSON/CSV/text path (file or folder depending on the chosen mode). |
-| `--file` | Force file → file processing (single PDF to JSON/CSV). |
-| `--folder` | Force directory → directory processing. |
-| `--nthreads NUM` | Limit worker threads; defaults to available CPU cores. |
-| `--csv-table` | Combine all parsed receipts into a single CSV table. |
-| `--txt-dump` | Dump raw text from PDFs instead of structured JSON. |
-| `--rawtext-file` | Store raw text for each file next to the outputs (mostly for debugging). |
-| `--rawtext-stdout` | Print a PDF's raw text to stdout for quick inspection. |
-| `--preserve-privacy` | Anonymize sensitive fields (addresses, loyalty IDs, payments) before writing JSON/text/CSV. |
-| `--version` | Show the installed version and exit. |
-| `-h`, `--help` | Show the usage message that the CLI generates from `argparse`. |
+The section below is automatically generated from the `rewe-ebon-parser --help` command to ensure it is always in sync with the latest version.
+
+{{< include _cli-help.md >}}
 
 ## Common workflows
 
@@ -65,4 +54,4 @@ rewe-ebon-parser --txt-dump --folder examples/eBons/ receipts_txt --preserve-pri
 
 ## Keep the page in sync
 
-This file is plain Markdown, so update it whenever you add or rename CLI flags. If you prefer the content to stay perfectly in step with the actual parser, replace the manual sections above with a code chunk that runs `python -m rewe_ebon_parser.cli --help` so the Quarto build captures the authoritative help output.
+The Arguments section above automatically includes the latest `rewe-ebon-parser --help` output via `_cli-help.md`. Continue editing the narrative sections and examples by hand so they stay friendly while the reference stays accurate.

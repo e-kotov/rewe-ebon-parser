@@ -166,5 +166,7 @@ examples/private
 
 /.quarto/
 **/*.quarto_ipynb
-.github/workflows/deploy-docs.yml
 .DS_Store
+# Quarto build artifacts
+_site/
+_cli-help.md

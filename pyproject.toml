@@ -19,6 +19,7 @@ classifiers = [
 
 dependencies = [
     "pdfplumber",
+    "pre-commit>=4.3.0",
     "pytest>=7.0.1",
     "pytz",
     "quartodoc>=0.11.1",
