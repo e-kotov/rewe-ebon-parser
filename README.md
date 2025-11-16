@@ -1,4 +1,8 @@
 [![Python package](https://github.com/e-kotov/rewe-ebon-parser/actions/workflows/python-package-test.yml/badge.svg)](https://github.com/e-kotov/rewe-ebon-parser/actions/workflows/python-package-test.yml)
+[![PyPI version](https://img.shields.io/pypi/v/rewe-ebon-parser?label=pypi%20package)](https://pypi.org/project/rewe-ebon-parser/)
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/rewe-ebon-parser?period=total&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=total+downloads)](https://pepy.tech/projects/rewe-ebon-parser)
+[![PyPI Downloads](https://static.pepy.tech/personalized-badge/rewe-ebon-parser?period=monthly&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=monthly+downloads)](https://pepy.tech/projects/rewe-ebon-parser)
+[![License](https://img.shields.io/pypi/l/rewe-ebon-parser)](LICENSE)
 
 **PyPI**: [https://pypi.org/project/rewe-ebon-parser/](https://pypi.org/project/rewe-ebon-parser/)  
 **Changelog**: [View Full Changelog](CHANGELOG.md)  
@@ -31,6 +35,36 @@ pip install rewe-ebon-parser
 
 ### Command Line Interface (CLI)
 
+#### Quick Start:
+
+
+##### Parse a Single PDF File and Save Items to CSV Table
+
+```bash
+rewe-ebon-parser [--file] <input_pdf_path> [output_csv_path] [--csv-table]
+```
+
+Example:
+
+```bash
+rewe-ebon-parser examples/eBons/1.pdf --csv-table
+```
+
+This saves to a csv file in the same folder as the input PDF with the same name but `.csv` extension, but feel free to specify a different output path for the csv file by addin a path to it after the input PDF path.
+
+##### Parse Multiple PDF Files in a Folder into a single CSV Table
+
+```bash
+rewe-ebon-parser [--folder] <input_folder> [output_folder] [--nthreads <number_of_threads>] [--csv-table]
+```
+
+Example:
+
+```bash
+rewe-ebon-parser examples/eBons/ --csv-table examples/all-purchases-table.csv
+```
+
+
 #### Parse a Single PDF File and save to JSON
 
 ```bash
@@ -53,24 +87,6 @@ Example:
 
 ```bash
 rewe-ebon-parser examples/eBons/
-```
-
-#### Parse a Single PDF File and Save Items to CSV Table
-
-```bash
-rewe-ebon-parser [--file] <input_pdf_path> [output_csv_path] [--csv-table]
-```
-
-Example:
-
-```bash
-rewe-ebon-parser examples/eBons/1.pdf --csv-table
-```
-
-#### Parsing Multiple PDF Files in a Folder into a single CSV Table
-
-```bash
-rewe-ebon-parser [--folder] <input_folder> [output_folder] [--nthreads <number_of_threads>] [--csv-table]
 ```
 
 
