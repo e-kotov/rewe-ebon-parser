@@ -126,7 +126,7 @@ def parse_ebon(data_buffer: bytes) -> dict:
                 break
 
     def _process_item_line(line: str) -> bool:
-        item_hit = re.match(r'([0-9A-Za-zäöüß &%.!+,\-/]*) (-?\d*,\d\d) ([ABC]) ?(\*?)', line)
+        item_hit = re.match(r'(.*?) (-?\d*,\d\d) ([ABC]) ?(\*?)', line)
         if item_hit:
             item = item_hit.group(1)
             price = float(item_hit.group(2).replace(',', '.'))
@@ -442,7 +442,7 @@ def parse_text_ebon(text: str) -> dict:
                 break
 
     def _process_item_line(line: str) -> bool:
-        item_hit = re.match(r'([0-9A-Za-zäöüß &%.!+,\-/]*) (-?\d*,\d\d) ([ABC]) ?(\*?)', line)
+        item_hit = re.match(r'(.*?) (-?\d*,\d\d) ([ABC]) ?(\*?)', line)
         if item_hit:
             item = item_hit.group(1)
             price = float(item_hit.group(2).replace(',', '.'))
@@ -632,12 +632,9 @@ def parse_text_ebon(text: str) -> dict:
     total_in_cents = total * 100
 
     # For anonymized files, skip total validation if it's off (might have redacted items)
+    # Validate that the sum of item sub_totals equals the receipt's total sum.
     if not math.isnan(total) and round(real_total_in_cents, 2) != round(total_in_cents, 2):
-        # Only raise if the difference is significant and we seem to have complete data
-        # (i.e., we have a timestamp indicating this is not anonymized)
-        if market != '?' or cashier != '?' or uid != '?':
-            raise ValueError(f"Something went wrong when parsing the eBon: The eBon states a total sum of {total_in_cents} but the parser only found items worth {real_total_in_cents}.")
-
+        raise ValueError(f"Something went wrong when parsing the eBon: The eBon states a total sum of {total:.2f} but the parser only found items worth {real_total_in_cents / 100:.2f}.")
     qualified_revenue = payback_revenue if not math.isnan(payback_revenue) else sum(item.sub_total for item in items if item.payback_qualified or item.sub_total < 0)
 
     receipt = Receipt(
