@@ -104,7 +104,28 @@ def parse_ebon(data_buffer: bytes) -> dict:
             city=address_match_2.group(3).strip()
         )
 
-    for line in lines:
+    # Detect the dedicated item block bounded by the EUR marker and dashed separator.
+    uid_index = -1
+    for idx, line in enumerate(lines):
+        if 'UID Nr.:' in line:
+            uid_index = idx
+            break
+
+    start_index = -1
+    if uid_index != -1:
+        for idx in range(uid_index + 1, len(lines)):
+            if lines[idx].strip() == 'EUR':
+                start_index = idx + 1  # start parsing after the EUR marker
+                break
+
+    end_index = -1
+    if start_index != -1:
+        for idx in range(start_index, len(lines)):
+            if lines[idx].strip().startswith('--------------------------------------'):
+                end_index = idx
+                break
+
+    def _process_item_line(line: str) -> bool:
         item_hit = re.match(r'([0-9A-Za-zäöüß &%.!+,\-/]*) (-?\d*,\d\d) ([ABC]) ?(\*?)', line)
         if item_hit:
             item = item_hit.group(1)
@@ -119,7 +140,7 @@ def parse_ebon(data_buffer: bytes) -> dict:
                 payback_qualified=payback_qualified,
                 amount=1
             ))
-            continue
+            return True
 
         menge_hit = re.match(r'(.*) (.*) x (.*).*', line)
         if menge_hit:
@@ -133,7 +154,7 @@ def parse_ebon(data_buffer: bytes) -> dict:
                 items[-1].amount = amount
                 items[-1].unit = unit
                 items[-1].price_per_unit = price_per_unit
-            continue
+            return True
 
         menge_handeingabe_hit = re.match(r"Handeingabe E-Bon\s*(\d+,\d+)\s*([a-zA-Z]*)", line)
         if menge_handeingabe_hit:
@@ -144,10 +165,17 @@ def parse_ebon(data_buffer: bytes) -> dict:
                 items[-1].unit = unit
                 items[-1].price_per_unit = items[-1].sub_total/amount
 
+        return False
+
+    def _process_non_item_line(line: str) -> bool:
+        nonlocal total, change, payout, date, market, checkout, cashier, uid
+        nonlocal payback_card_number, payback_points_before, payback_points, payback_revenue
+        nonlocal tax_details_total, tax_details_A, tax_details_B, tax_details_C
+        nonlocal used_rewe_credit, new_rewe_credit
         total_hit = re.match(r'SUMME EUR (-?\d*,\d\d)', line)
         if total_hit:
             total = float(total_hit.group(1).replace(',', '.'))
-            continue
+            return True
 
         gegeben_hit = re.match(r'Geg\.(.*) EUR ([0-9,]*)', line)
         if gegeben_hit:
@@ -155,62 +183,62 @@ def parse_ebon(data_buffer: bytes) -> dict:
                 type=gegeben_hit.group(1).strip(),
                 value=float(gegeben_hit.group(2).replace(',', '.'))
             ))
-            continue
+            return True
 
         return_hit = re.match(r'Rückgeld BAR EUR ([0-9,]*)', line)
         if return_hit:
             change = float(return_hit.group(1).replace(',', '.'))
-            continue
+            return True
 
         payout_match = re.match(r'AUSZAHLUNG EUR ([0-9,]*)', line)
         if payout_match:
             payout = float(payout_match.group(1).replace(',', '.'))
-            continue
+            return True
 
         parsed_date = _parse_date(line)
         if parsed_date:
             date = parsed_date
-            continue
+            return True
 
         markt_match = re.match(r'Markt:(.*) Kasse:(.*) Bed\.:(.*)', line)
         if markt_match:
             market = markt_match.group(1).strip()
             checkout = markt_match.group(2).strip()
             cashier = markt_match.group(3).strip()
-            continue
+            return True
 
         uid_match = re.match(r'UID Nr.: (.*)', line)
         if uid_match:
             uid = uid_match.group(1).strip()
-            continue
+            return True
 
         payback_info_match = re.match(r'PAYBACK Karten-Nr\.: ([0-9#]*)Punkte vor dem Einkauf: ([0-9.,]*) Punkte', line)
         if payback_info_match:
             payback_card_number = payback_info_match.group(1)
             payback_points_before = int(payback_info_match.group(2).replace('.', '').replace(',', ''))
-            continue
+            return True
 
         payback_points_match = re.match(r'Sie erhalten (\d*) PAYBACK Punkte? auf|Mit diesem Einkauf gesammelt: (\d*) Punkte?', line)
         if payback_points_match:
             match = next(group for group in payback_points_match.groups() if group is not None)
             payback_points = int(match)
-            continue
+            return True
 
         payback_revenue_match = re.match(r'einen PAYBACK Umsatz von (.*) EUR!', line)
         if payback_revenue_match:
             payback_revenue = float(payback_revenue_match.group(1).replace(',', '.'))
-            continue
+            return True
 
         payback_points_before_match = re.match(r'Punktestand vor Einkauf: ([0-9.]*)|Punkte vor dem Einkauf: ([0-9.]*)', line)
         if payback_points_before_match:
             match = next(group for group in payback_points_before_match.groups() if group is not None)
             payback_points_before = int(match.replace('.', ''))
-            continue
+            return True
 
         payback_card_number_match = re.match(r'PAYBACK Karten-Nr\.: ([0-9#]*)', line)
         if payback_card_number_match:
             payback_card_number = payback_card_number_match.group(1)
-            continue
+            return True
 
         payback_coupon_match = re.match(r'(.*) ([0-9.]*) Punkte?', line)
         if payback_coupon_match:
@@ -218,7 +246,7 @@ def parse_ebon(data_buffer: bytes) -> dict:
                 name=payback_coupon_match.group(1),
                 points=int(payback_coupon_match.group(2).replace('.', ''))
             ))
-            continue
+            return True
 
         tax_details_match = re.match(r'([ABC])= ([0-9,]*)% ([0-9,]*) ([0-9,]*) ([0-9,]*)', line)
         if tax_details_match:
@@ -235,7 +263,7 @@ def parse_ebon(data_buffer: bytes) -> dict:
                 tax_details_B = tax_details_entry
             elif category == 'C':
                 tax_details_C = tax_details_entry
-            continue
+            return True
 
         total_tax_match = re.match(r'Gesamtbetrag ([0-9,]*) ([0-9,]*) ([0-9,]*)', line)
         if total_tax_match:
@@ -245,7 +273,7 @@ def parse_ebon(data_buffer: bytes) -> dict:
                 tax=float(total_tax_match.group(2).replace(',', '.')),
                 gross=float(total_tax_match.group(3).replace(',', '.'))
             )
-            continue
+            return True
 
         used_rewe_credit_match = re.match(r'Eingesetztes REWE Guthaben: ([0-9,]*) EUR', line)
         if used_rewe_credit_match:
@@ -254,6 +282,27 @@ def parse_ebon(data_buffer: bytes) -> dict:
         new_rewe_credit_match = re.match(r'Neues REWE Guthaben: ([0-9,]*) EUR', line)
         if new_rewe_credit_match:
             new_rewe_credit = float(new_rewe_credit_match.group(1).replace(',', '.'))
+
+        return False
+
+    if start_index != -1 and end_index != -1:
+        header_lines = lines[:start_index]
+        item_lines = lines[start_index:end_index]
+        footer_lines = lines[end_index:]
+
+        for line in header_lines + footer_lines:
+            if _process_non_item_line(line):
+                continue
+
+        for line in item_lines:
+            if _process_item_line(line):
+                continue
+    else:
+        for line in lines:
+            if _process_item_line(line):
+                continue
+            if _process_non_item_line(line):
+                continue
 
     if date is None:
         raise ValueError("Date not found in the receipt")
@@ -372,7 +421,27 @@ def parse_text_ebon(text: str) -> dict:
             city=address_match_2.group(3).strip()
         )
 
-    for line in lines:
+    uid_index = -1
+    for idx, line in enumerate(lines):
+        if 'UID Nr.:' in line:
+            uid_index = idx
+            break
+
+    start_index = -1
+    if uid_index != -1:
+        for idx in range(uid_index + 1, len(lines)):
+            if lines[idx].strip() == 'EUR':
+                start_index = idx + 1
+                break
+
+    end_index = -1
+    if start_index != -1:
+        for idx in range(start_index, len(lines)):
+            if lines[idx].strip().startswith('--------------------------------------'):
+                end_index = idx
+                break
+
+    def _process_item_line(line: str) -> bool:
         item_hit = re.match(r'([0-9A-Za-zäöüß &%.!+,\-/]*) (-?\d*,\d\d) ([ABC]) ?(\*?)', line)
         if item_hit:
             item = item_hit.group(1)
@@ -387,7 +456,7 @@ def parse_text_ebon(text: str) -> dict:
                 payback_qualified=payback_qualified,
                 amount=1
             ))
-            continue
+            return True
 
         menge_hit = re.match(r'(.*) (.*) x (.*).*', line)
         if menge_hit:
@@ -401,7 +470,7 @@ def parse_text_ebon(text: str) -> dict:
                 items[-1].amount = amount
                 items[-1].unit = unit
                 items[-1].price_per_unit = price_per_unit
-            continue
+            return True
 
         menge_handeingabe_hit = re.match(r"Handeingabe E-Bon\s*(\d+,\d+)\s*([a-zA-Z]*)", line)
         if menge_handeingabe_hit:
@@ -412,10 +481,18 @@ def parse_text_ebon(text: str) -> dict:
                 items[-1].unit = unit
                 items[-1].price_per_unit = items[-1].sub_total/amount
 
+        return False
+
+    def _process_non_item_line(line: str) -> bool:
+        nonlocal total, change, payout, date, market, checkout, cashier, uid
+        nonlocal payback_card_number, payback_points_before, payback_points, payback_revenue
+        nonlocal tax_details_total, tax_details_A, tax_details_B, tax_details_C
+        nonlocal used_rewe_credit, new_rewe_credit
+
         total_hit = re.match(r'SUMME EUR (-?\d*,\d\d)', line)
         if total_hit:
             total = float(total_hit.group(1).replace(',', '.'))
-            continue
+            return True
 
         gegeben_hit = re.match(r'Geg\.(.*) EUR ([0-9,]*)', line)
         if gegeben_hit:
@@ -423,62 +500,62 @@ def parse_text_ebon(text: str) -> dict:
                 type=gegeben_hit.group(1).strip(),
                 value=float(gegeben_hit.group(2).replace(',', '.'))
             ))
-            continue
+            return True
 
         return_hit = re.match(r'Rückgeld BAR EUR ([0-9,]*)', line)
         if return_hit:
             change = float(return_hit.group(1).replace(',', '.'))
-            continue
+            return True
 
         payout_match = re.match(r'AUSZAHLUNG EUR ([0-9,]*)', line)
         if payout_match:
             payout = float(payout_match.group(1).replace(',', '.'))
-            continue
+            return True
 
         parsed_date = _parse_date(line)
         if parsed_date:
             date = parsed_date
-            continue
+            return True
 
         markt_match = re.match(r'Markt:(.*) Kasse:(.*) Bed\.:(.*)', line)
         if markt_match:
             market = markt_match.group(1).strip()
             checkout = markt_match.group(2).strip()
             cashier = markt_match.group(3).strip()
-            continue
+            return True
 
         uid_match = re.match(r'UID Nr.: (.*)', line)
         if uid_match:
             uid = uid_match.group(1).strip()
-            continue
+            return True
 
         payback_info_match = re.match(r'PAYBACK Karten-Nr\.: ([0-9#]*)Punkte vor dem Einkauf: ([0-9.,]*) Punkte', line)
         if payback_info_match:
             payback_card_number = payback_info_match.group(1)
             payback_points_before = int(payback_info_match.group(2).replace('.', '').replace(',', ''))
-            continue
+            return True
 
         payback_points_match = re.match(r'Sie erhalten (\d*) PAYBACK Punkte? auf|Mit diesem Einkauf gesammelt: (\d*) Punkte?', line)
         if payback_points_match:
             match = next(group for group in payback_points_match.groups() if group is not None)
             payback_points = int(match)
-            continue
+            return True
 
         payback_revenue_match = re.match(r'einen PAYBACK Umsatz von (.*) EUR!', line)
         if payback_revenue_match:
             payback_revenue = float(payback_revenue_match.group(1).replace(',', '.'))
-            continue
+            return True
 
         payback_points_before_match = re.match(r'Punktestand vor Einkauf: ([0-9.]*)|Punkte vor dem Einkauf: ([0-9.]*)', line)
         if payback_points_before_match:
             match = next(group for group in payback_points_before_match.groups() if group is not None)
             payback_points_before = int(match.replace('.', ''))
-            continue
+            return True
 
         payback_card_number_match = re.match(r'PAYBACK Karten-Nr\.: ([0-9#]*)', line)
         if payback_card_number_match:
             payback_card_number = payback_card_number_match.group(1)
-            continue
+            return True
 
         payback_coupon_match = re.match(r'(.*) ([0-9.]*) Punkte?', line)
         if payback_coupon_match:
@@ -486,7 +563,7 @@ def parse_text_ebon(text: str) -> dict:
                 name=payback_coupon_match.group(1),
                 points=int(payback_coupon_match.group(2).replace('.', ''))
             ))
-            continue
+            return True
 
         tax_details_match = re.match(r'([ABC])= ([0-9,]*)% ([0-9,]*) ([0-9,]*) ([0-9,]*)', line)
         if tax_details_match:
@@ -503,7 +580,7 @@ def parse_text_ebon(text: str) -> dict:
                 tax_details_B = tax_details_entry
             elif category == 'C':
                 tax_details_C = tax_details_entry
-            continue
+            return True
 
         total_tax_match = re.match(r'Gesamtbetrag ([0-9,]*) ([0-9,]*) ([0-9,]*)', line)
         if total_tax_match:
@@ -513,7 +590,7 @@ def parse_text_ebon(text: str) -> dict:
                 tax=float(total_tax_match.group(2).replace(',', '.')),
                 gross=float(total_tax_match.group(3).replace(',', '.'))
             )
-            continue
+            return True
 
         used_rewe_credit_match = re.match(r'Eingesetztes REWE Guthaben: ([0-9,]*) EUR', line)
         if used_rewe_credit_match:
@@ -522,6 +599,27 @@ def parse_text_ebon(text: str) -> dict:
         new_rewe_credit_match = re.match(r'Neues REWE Guthaben: ([0-9,]*) EUR', line)
         if new_rewe_credit_match:
             new_rewe_credit = float(new_rewe_credit_match.group(1).replace(',', '.'))
+
+        return False
+
+    if start_index != -1 and end_index != -1:
+        header_lines = lines[:start_index]
+        item_lines = lines[start_index:end_index]
+        footer_lines = lines[end_index:]
+
+        for line in header_lines + footer_lines:
+            if _process_non_item_line(line):
+                continue
+
+        for line in item_lines:
+            if _process_item_line(line):
+                continue
+    else:
+        for line in lines:
+            if _process_item_line(line):
+                continue
+            if _process_non_item_line(line):
+                continue
 
     # For anonymized text files, date might not be available
     if date is None:
