@@ -152,22 +152,7 @@ def parse_ebon(data_buffer: bytes) -> dict:
                 break
 
     def _process_item_line(line: str) -> bool:
-        item_hit = re.match(r'(.*?) (-?\d*,\d\d) ([ABC]) ?(\*?)', line)
-        if item_hit:
-            item = item_hit.group(1)
-            price = float(item_hit.group(2).replace(',', '.'))
-            category = item_hit.group(3)
-            loyalty_program_qualified = detected_loyalty_program if (not item_hit.group(4) and price > 0) else None
-
-            items.append(ReceiptItem(
-                tax_category=category,
-                name=item,
-                sub_total=price,
-                amount=1,
-                loyalty_program_qualified=loyalty_program_qualified
-            ))
-            return True
-
+        # First, check for quantity/weight lines, as they modify the last added item.
         menge_hit = re.match(r'(.*) (.*) x (.*).*', line)
         if menge_hit:
             amount = float(menge_hit.group(1).replace(',', '.'))
@@ -190,8 +175,47 @@ def parse_ebon(data_buffer: bytes) -> dict:
                 items[-1].amount = amount
                 items[-1].unit = unit
                 items[-1].price_per_unit = items[-1].sub_total/amount
+            return True
 
-        return False
+        # If not a quantity line, check for one or more item definitions.
+        # This handles cases where multiple items are merged onto a single line.
+        item_pattern = r'(-?\d+,\d\d) ([ABC]) ?(\*?)'
+        matches = list(re.finditer(item_pattern, line))
+
+        if not matches:
+            return False # Not a line with parsable items.
+
+        last_pos = 0
+        processed_item = False
+        for match in matches:
+            # The item name is the text between the end of the last full match and
+            # the beginning of the current price match.
+            item_name = line[last_pos:match.start()].strip()
+            
+            # Skip if there's no item name (e.g., malformed line)
+            if not item_name:
+                last_pos = match.end()
+                continue
+            
+            price_str = match.group(1)
+            category = match.group(2)
+            star = match.group(3)
+
+            price = float(price_str.replace(',', '.'))
+            loyalty_program_qualified = detected_loyalty_program if (not star and price > 0) else None
+
+            items.append(ReceiptItem(
+                tax_category=category,
+                name=item_name,
+                sub_total=price,
+                amount=1, # Default amount, may be overridden by a following line
+                loyalty_program_qualified=loyalty_program_qualified
+            ))
+            
+            last_pos = match.end()
+            processed_item = True
+        
+        return processed_item
 
     def _process_non_item_line(line: str) -> bool:
         nonlocal total, change, payout, date, market, checkout, cashier, uid
@@ -522,22 +546,7 @@ def parse_text_ebon(text: str) -> dict:
                 break
 
     def _process_item_line(line: str) -> bool:
-        item_hit = re.match(r'(.*?) (-?\d*,\d\d) ([ABC]) ?(\*?)', line)
-        if item_hit:
-            item = item_hit.group(1)
-            price = float(item_hit.group(2).replace(',', '.'))
-            category = item_hit.group(3)
-            loyalty_program_qualified = detected_loyalty_program if (not item_hit.group(4) and price > 0) else None
-
-            items.append(ReceiptItem(
-                tax_category=category,
-                name=item,
-                sub_total=price,
-                amount=1,
-                loyalty_program_qualified=loyalty_program_qualified
-            ))
-            return True
-
+        # First, check for quantity/weight lines, as they modify the last added item.
         menge_hit = re.match(r'(.*) (.*) x (.*).*', line)
         if menge_hit:
             amount = float(menge_hit.group(1).replace(',', '.'))
@@ -560,8 +569,47 @@ def parse_text_ebon(text: str) -> dict:
                 items[-1].amount = amount
                 items[-1].unit = unit
                 items[-1].price_per_unit = items[-1].sub_total/amount
+            return True
 
-        return False
+        # If not a quantity line, check for one or more item definitions.
+        # This handles cases where multiple items are merged onto a single line.
+        item_pattern = r'(-?\d+,\d\d) ([ABC]) ?(\*?)'
+        matches = list(re.finditer(item_pattern, line))
+
+        if not matches:
+            return False # Not a line with parsable items.
+
+        last_pos = 0
+        processed_item = False
+        for match in matches:
+            # The item name is the text between the end of the last full match and
+            # the beginning of the current price match.
+            item_name = line[last_pos:match.start()].strip()
+            
+            # Skip if there's no item name (e.g., malformed line)
+            if not item_name:
+                last_pos = match.end()
+                continue
+            
+            price_str = match.group(1)
+            category = match.group(2)
+            star = match.group(3)
+
+            price = float(price_str.replace(',', '.'))
+            loyalty_program_qualified = detected_loyalty_program if (not star and price > 0) else None
+
+            items.append(ReceiptItem(
+                tax_category=category,
+                name=item_name,
+                sub_total=price,
+                amount=1, # Default amount, may be overridden by a following line
+                loyalty_program_qualified=loyalty_program_qualified
+            ))
+            
+            last_pos = match.end()
+            processed_item = True
+        
+        return processed_item
 
     def _process_non_item_line(line: str) -> bool:
         nonlocal total, change, payout, date, market, checkout, cashier, uid
@@ -663,7 +711,7 @@ def parse_text_ebon(text: str) -> dict:
                 return True
 
             rewe_bonus_coupon_match = re.match(r'(.*) ([0-9.,]+) EUR', line)
-            if rewe_bonus_coupon_match and 'Bonus-Guthaben' not in line and 'Mit diesem Einkauf' not in line:
+            if rewe_bonus_coupon_match and 'Bonus-Guhaben' not in line and 'Mit diesem Einkauf' not in line:
                 coupon_name = rewe_bonus_coupon_match.group(1).strip()
                 if coupon_name:
                     rewe_bonus_coupons.append(REWEBonusCoupon(
