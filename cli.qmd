@@ -1,0 +1,57 @@
+---
+title: "Command Line Reference"
+---
+
+The `rewe-ebon-parser` CLI is the primary way to turn REWE eBons into JSON or CSV. This page groups the important flags and workflows in one place so you do not have to dig into the API reference.
+
+## Basic usage
+
+```bash
+rewe-ebon-parser [--file | --folder] <input_path> [output_path] [OPTIONS]
+```
+
+- When no mode flag is given the tool auto-detects whether `input_path` is a single file or a directory.
+- `output_path` is optional; defaults depend on the mode (JSON next to the PDF, `rewe_json_out/`, etc.).
+- Use `--help` at any time to print the latest usage text.
+
+## Arguments
+
+The section below is automatically generated from the `rewe-ebon-parser --help` command to ensure it is always in sync with the latest version.
+
+{{< include _cli-help.md >}}
+
+## Common workflows
+
+### Convert a single PDF to JSON or CSV
+
+```bash
+# Auto-detect mode; writes JSON next to the input
+rewe-ebon-parser examples/eBons/1.pdf
+
+# Force CSV output for a single file
+rewe-ebon-parser --file examples/eBons/1.pdf --csv-table
+```
+
+### Convert a directory of PDFs
+
+```bash
+# Auto-detect folder and store JSONs in rewe_json_out
+rewe-ebon-parser examples/eBons/
+
+# Write a consolidated CSV file
+rewe-ebon-parser --folder examples/eBons/ --csv-table examples/all-items.csv
+```
+
+### Produce privacy-safe text dumps
+
+```bash
+# Single file
+rewe-ebon-parser --txt-dump --preserve-privacy examples/eBons/1.pdf
+
+# Folder
+rewe-ebon-parser --txt-dump --folder examples/eBons/ receipts_txt --preserve-privacy
+```
+
+## Keep the page in sync
+
+The Arguments section above automatically includes the latest `rewe-ebon-parser --help` output via `_cli-help.md`. Continue editing the narrative sections and examples by hand so they stay friendly while the reference stays accurate.
