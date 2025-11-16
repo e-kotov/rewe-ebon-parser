@@ -19,10 +19,13 @@ def dump_items_to_csv(parsed_receipts: List[Dict], output_path: Path):
             items.append(item)
 
     if items:
+        for item in items:
+            item['loyaltyProgramQualified'] = True if item.get('loyaltyProgramQualified') else False
+
         # Define the desired field order
         fieldnames = [
             'datetime_local', 'name', 'subTotal', 'amount', 
-            'pricePerUnit', 'unit', 'taxCategory', 'paybackQualified'
+            'pricePerUnit', 'unit', 'taxCategory', 'loyaltyProgramQualified'
         ]
 
         # Ensure all keys are present in each item
