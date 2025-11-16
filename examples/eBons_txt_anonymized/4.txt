@@ -1,0 +1,13 @@
+[HEADER REDACTED]
+EUR
+Item: Special Edition 1,23 A
+"Quoted Item" (New!) 4,56 B
+A Back\slash Item 7,89 C
+B forward/slash Item 2,34 A
+Crème Brûlée Special 2,50 B *
+An Item with # and @ symbols 3,33 B
+A Questionable Item? 0,99 A
+Weird Discount ;-) -1,00 B
+SUMME EUR 21,84
+======================================
+[OTHER DATA REDACTED]

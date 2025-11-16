@@ -18,6 +18,9 @@ PDF_CASES = [
 # these corresponding .txt files in the 'eBons_txt_anonymized' folder.
 TXT_CASES = [
     ('1.txt', 'txt', 5),
+    ('2.txt', 'txt', 5), # test if fallback works when EUR and --- are missing
+    ('3.txt', 'txt', 44),
+    ('4.txt', 'txt', 8), # test special characters handling
 ]
 
 # Combine all test cases for the parameterizer (gracefully handle undefined lists)
