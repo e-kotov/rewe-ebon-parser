@@ -22,6 +22,7 @@ metadata-files:
 # Apply the default quartodoc styling
 format:
   html:
+    default-image-extension: ""
     theme: cosmo
     css:
       - "reference/_styles-quartodoc.css"
