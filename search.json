@@ -1,0 +1,372 @@
+[
+  {
+    "objectID": "cli.html",
+    "href": "cli.html",
+    "title": "Command Line Reference",
+    "section": "",
+    "text": "The rewe-ebon-parser CLI is the primary way to turn REWE eBons into JSON or CSV. This page groups the important flags and workflows in one place so you do not have to dig into the API reference."
+  },
+  {
+    "objectID": "cli.html#basic-usage",
+    "href": "cli.html#basic-usage",
+    "title": "Command Line Reference",
+    "section": "Basic usage",
+    "text": "Basic usage\nrewe-ebon-parser [--file | --folder] &lt;input_path&gt; [output_path] [OPTIONS]\n\nWhen no mode flag is given the tool auto-detects whether input_path is a single file or a directory.\noutput_path is optional; defaults depend on the mode (JSON next to the PDF, rewe_json_out/, etc.).\nUse --help at any time to print the latest usage text."
+  },
+  {
+    "objectID": "cli.html#arguments",
+    "href": "cli.html#arguments",
+    "title": "Command Line Reference",
+    "section": "Arguments",
+    "text": "Arguments\nThe section below is automatically generated from the rewe-ebon-parser --help command to ensure it is always in sync with the latest version.\nusage: rewe-ebon-parser [-h] [--file] [--folder] [--nthreads NTHREADS]\n                        [--txt-dump] [--preserve-privacy] [--rawtext-file]\n                        [--rawtext-stdout] [--csv-table] [--version]\n                        [input_path] [output_path]\n\nParse REWE eBons from PDF to JSON or CSV table.\n\npositional arguments:\n  input_path           Path to input PDF file or folder containing PDF files.\n  output_path          Path to output JSON/CSV file or folder for JSON files.\n\noptions:\n  -h, --help           show this help message and exit\n  --file               Specify if the input and output paths are files.\n  --folder             Specify if the input and output paths are folders.\n  --nthreads NTHREADS  Number of concurrent threads to use for processing\n                       files. Defaults to maximum available CPU cores.\n  --txt-dump           Output raw text extracted from the PDF files to .txt\n                       files instead of JSON.\n  --preserve-privacy   Anonymize sensitive data in JSON or text dump outputs.\n  --rawtext-file       Output raw text extracted from the PDF files to .txt\n                       files.\n  --rawtext-stdout     Print raw text extracted from the PDF files to the\n                       console.\n  --csv-table          Output all items from all parsed receipts into a single\n                       CSV table.\n  --version            Show the version number and exit."
+  },
+  {
+    "objectID": "cli.html#common-workflows",
+    "href": "cli.html#common-workflows",
+    "title": "Command Line Reference",
+    "section": "Common workflows",
+    "text": "Common workflows\n\nConvert a single PDF to JSON or CSV\n# Auto-detect mode; writes JSON next to the input\nrewe-ebon-parser examples/eBons/1.pdf\n\n# Force CSV output for a single file\nrewe-ebon-parser --file examples/eBons/1.pdf --csv-table\n\n\nConvert a directory of PDFs\n# Auto-detect folder and store JSONs in rewe_json_out\nrewe-ebon-parser examples/eBons/\n\n# Write a consolidated CSV file\nrewe-ebon-parser --folder examples/eBons/ --csv-table examples/all-items.csv\n\n\nProduce privacy-safe text dumps\n# Single file\nrewe-ebon-parser --txt-dump --preserve-privacy examples/eBons/1.pdf\n\n# Folder\nrewe-ebon-parser --txt-dump --folder examples/eBons/ receipts_txt --preserve-privacy"
+  },
+  {
+    "objectID": "cli.html#keep-the-page-in-sync",
+    "href": "cli.html#keep-the-page-in-sync",
+    "title": "Command Line Reference",
+    "section": "Keep the page in sync",
+    "text": "Keep the page in sync\nThe Arguments section above automatically includes the latest rewe-ebon-parser --help output via _cli-help.md. Continue editing the narrative sections and examples by hand so they stay friendly while the reference stays accurate."
+  },
+  {
+    "objectID": "reference/parse_pdf_ebon.html",
+    "href": "reference/parse_pdf_ebon.html",
+    "title": "parse_pdf_ebon",
+    "section": "",
+    "text": "parse_pdf_ebon\nparse_pdf_ebon(pdf_path)\nParse receipt data from a PDF file.\nArgs: pdf_path (str): Path to the input PDF file.\nReturns: dict: The parsed receipt data.",
+    "crumbs": [
+      "API Reference",
+      "Core Functions",
+      "parse_pdf_ebon"
+    ]
+  },
+  {
+    "objectID": "reference/PaybackDetails.html",
+    "href": "reference/PaybackDetails.html",
+    "title": "PaybackDetails",
+    "section": "",
+    "text": "PaybackDetails(\n    card,\n    points_before,\n    earned_points,\n    used_coupons,\n    used_rewe_credit,\n    new_rewe_credit,\n    payback_revenue,\n)\nRepresents payback-specific loyalty details for a receipt.\nAttributes: card (str): The payback card number. points_before (float): The points before the transaction. earned_points (int): The points earned in the transaction. used_coupons (List[PaybackCoupon]): The used payback coupons. used_rewe_credit (Optional[float]): The used REWE credit. new_rewe_credit (Optional[float]): The new REWE credit. payback_revenue (float): The payback revenue.\n\n\n\n\n\nName\nDescription\n\n\n\n\nbase_points\nCalculate the base points excluding coupon points.\n\n\ncoupon_points\nCalculate the total points from used coupons.\n\n\nqualified_revenue\nGet the qualified revenue for payback.\n\n\n\n\n\n\n\n\n\nName\nDescription\n\n\n\n\nto_dict\nConverts the PaybackDetails instance to a dictionary.\n\n\n\n\n\nPaybackDetails.to_dict()\nConverts the PaybackDetails instance to a dictionary.\nReturns: dict: A dictionary representation of the PaybackDetails instance.",
+    "crumbs": [
+      "API Reference",
+      "Data Classes",
+      "PaybackDetails"
+    ]
+  },
+  {
+    "objectID": "reference/PaybackDetails.html#attributes",
+    "href": "reference/PaybackDetails.html#attributes",
+    "title": "PaybackDetails",
+    "section": "",
+    "text": "Name\nDescription\n\n\n\n\nbase_points\nCalculate the base points excluding coupon points.\n\n\ncoupon_points\nCalculate the total points from used coupons.\n\n\nqualified_revenue\nGet the qualified revenue for payback.",
+    "crumbs": [
+      "API Reference",
+      "Data Classes",
+      "PaybackDetails"
+    ]
+  },
+  {
+    "objectID": "reference/PaybackDetails.html#methods",
+    "href": "reference/PaybackDetails.html#methods",
+    "title": "PaybackDetails",
+    "section": "",
+    "text": "Name\nDescription\n\n\n\n\nto_dict\nConverts the PaybackDetails instance to a dictionary.\n\n\n\n\n\nPaybackDetails.to_dict()\nConverts the PaybackDetails instance to a dictionary.\nReturns: dict: A dictionary representation of the PaybackDetails instance.",
+    "crumbs": [
+      "API Reference",
+      "Data Classes",
+      "PaybackDetails"
+    ]
+  },
+  {
+    "objectID": "reference/ReceiptItem.html",
+    "href": "reference/ReceiptItem.html",
+    "title": "ReceiptItem",
+    "section": "",
+    "text": "ReceiptItem(\n    tax_category,\n    name,\n    sub_total,\n    amount,\n    unit=None,\n    price_per_unit=None,\n    loyalty_program_qualified=None,\n)\nRepresents an item in a receipt.\nAttributes: tax_category (str): The tax category of the item. name (str): The name of the item. sub_total (float): The subtotal of the item. loyalty_program_qualified (Optional[str]): Name of the qualifying loyalty program if applicable. amount (float): The amount of the item. unit (Optional[str]): The unit of the item. price_per_unit (Optional[float]): The price per unit of the item.\n\n\n\n\n\nName\nDescription\n\n\n\n\nto_dict\nConverts the ReceiptItem instance to a dictionary.\n\n\n\n\n\nReceiptItem.to_dict()\nConverts the ReceiptItem instance to a dictionary.\nReturns: dict: A dictionary representation of the ReceiptItem instance.",
+    "crumbs": [
+      "API Reference",
+      "Data Classes",
+      "ReceiptItem"
+    ]
+  },
+  {
+    "objectID": "reference/ReceiptItem.html#methods",
+    "href": "reference/ReceiptItem.html#methods",
+    "title": "ReceiptItem",
+    "section": "",
+    "text": "Name\nDescription\n\n\n\n\nto_dict\nConverts the ReceiptItem instance to a dictionary.\n\n\n\n\n\nReceiptItem.to_dict()\nConverts the ReceiptItem instance to a dictionary.\nReturns: dict: A dictionary representation of the ReceiptItem instance.",
+    "crumbs": [
+      "API Reference",
+      "Data Classes",
+      "ReceiptItem"
+    ]
+  },
+  {
+    "objectID": "reference/MarketAddress.html",
+    "href": "reference/MarketAddress.html",
+    "title": "MarketAddress",
+    "section": "",
+    "text": "MarketAddress(street, zip, city)\nRepresents a market address.\nAttributes: street (str): The street of the market. zip (str): The ZIP code of the market. city (str): The city where the market is located.\n\n\n\n\n\nName\nDescription\n\n\n\n\nto_dict\nConverts the MarketAddress instance to a dictionary.\n\n\n\n\n\nMarketAddress.to_dict()\nConverts the MarketAddress instance to a dictionary.\nReturns: dict: A dictionary representation of the MarketAddress instance.",
+    "crumbs": [
+      "API Reference",
+      "Data Classes",
+      "MarketAddress"
+    ]
+  },
+  {
+    "objectID": "reference/MarketAddress.html#methods",
+    "href": "reference/MarketAddress.html#methods",
+    "title": "MarketAddress",
+    "section": "",
+    "text": "Name\nDescription\n\n\n\n\nto_dict\nConverts the MarketAddress instance to a dictionary.\n\n\n\n\n\nMarketAddress.to_dict()\nConverts the MarketAddress instance to a dictionary.\nReturns: dict: A dictionary representation of the MarketAddress instance.",
+    "crumbs": [
+      "API Reference",
+      "Data Classes",
+      "MarketAddress"
+    ]
+  },
+  {
+    "objectID": "reference/index.html",
+    "href": "reference/index.html",
+    "title": "Function reference",
+    "section": "",
+    "text": "Parse REWE eBons from PDF files or raw text.\n\n\n\nparse_ebon\nParse receipt data from a PDF data buffer.\n\n\nparse_pdf_ebon\nParse receipt data from a PDF file.\n\n\n\n\n\n\nObjects representing the structure of a parsed receipt.\n\n\n\nReceipt\nRepresents a receipt.\n\n\nReceiptItem\nRepresents an item in a receipt.\n\n\nLoyaltyData\nGeneric container describing which loyalty program is associated with the receipt.\n\n\nMarketAddress\nRepresents a market address.\n\n\nPayment\nRepresents a payment in a receipt.\n\n\nTaxDetails\nRepresents tax details for a receipt.\n\n\nPaybackDetails\nRepresents payback-specific loyalty details for a receipt.\n\n\nREWEBonusDetails\nHolds REWE Bonus loyalty data for a receipt.",
+    "crumbs": [
+      "API Reference",
+      "Function reference"
+    ]
+  },
+  {
+    "objectID": "reference/index.html#core-functions",
+    "href": "reference/index.html#core-functions",
+    "title": "Function reference",
+    "section": "",
+    "text": "Parse REWE eBons from PDF files or raw text.\n\n\n\nparse_ebon\nParse receipt data from a PDF data buffer.\n\n\nparse_pdf_ebon\nParse receipt data from a PDF file.",
+    "crumbs": [
+      "API Reference",
+      "Function reference"
+    ]
+  },
+  {
+    "objectID": "reference/index.html#data-classes",
+    "href": "reference/index.html#data-classes",
+    "title": "Function reference",
+    "section": "",
+    "text": "Objects representing the structure of a parsed receipt.\n\n\n\nReceipt\nRepresents a receipt.\n\n\nReceiptItem\nRepresents an item in a receipt.\n\n\nLoyaltyData\nGeneric container describing which loyalty program is associated with the receipt.\n\n\nMarketAddress\nRepresents a market address.\n\n\nPayment\nRepresents a payment in a receipt.\n\n\nTaxDetails\nRepresents tax details for a receipt.\n\n\nPaybackDetails\nRepresents payback-specific loyalty details for a receipt.\n\n\nREWEBonusDetails\nHolds REWE Bonus loyalty data for a receipt.",
+    "crumbs": [
+      "API Reference",
+      "Function reference"
+    ]
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "rewe-ebon-parser: Home",
+    "section": "",
+    "text": "PyPI: https://pypi.org/project/rewe-ebon-parser/\nChangelog: View Full Changelog\nReleases: View Release History on GitHub"
+  },
+  {
+    "objectID": "index.html#features",
+    "href": "index.html#features",
+    "title": "rewe-ebon-parser: Home",
+    "section": "Features",
+    "text": "Features\n\nParse individual PDF files or entire folders containing PDF files.\nOutput parsed data as JSON or CSV.\nExtract and output raw text from PDF files (bascially, the output of the underlying pdfplumber).\nConcurrent processing of multiple PDF files with adjustable threading.\nDetailed logging of processing results in CSV format.\nSupports both PAYBACK and the new REWE Bonus loyalty programs."
+  },
+  {
+    "objectID": "index.html#installation",
+    "href": "index.html#installation",
+    "title": "rewe-ebon-parser: Home",
+    "section": "Installation",
+    "text": "Installation\nYou can install the package using pip:\npip install rewe-ebon-parser"
+  },
+  {
+    "objectID": "index.html#usage",
+    "href": "index.html#usage",
+    "title": "rewe-ebon-parser: Home",
+    "section": "Usage",
+    "text": "Usage\nYou can find PDF receipt files to test on in the examples/eBons folder in this repo borrowed from rewe-ebon-parser.\n\nCommand Line Interface (CLI)\n\nQuick Start:\n\nParse a Single PDF File and Save Items to CSV Table\nrewe-ebon-parser [--file] &lt;input_pdf_path&gt; [output_csv_path] [--csv-table]\nExample:\nrewe-ebon-parser examples/eBons/1.pdf --csv-table\nThis saves to a csv file in the same folder as the input PDF with the same name but .csv extension, but feel free to specify a different output path for the csv file by addin a path to it after the input PDF path.\n\n\nParse Multiple PDF Files in a Folder into a single CSV Table\nrewe-ebon-parser [--folder] &lt;input_folder&gt; [output_folder] [--nthreads &lt;number_of_threads&gt;] [--csv-table]\nExample:\nrewe-ebon-parser examples/eBons/ --csv-table examples/all-purchases-table.csv\n\n\n\nParse a Single PDF File and save to JSON\nrewe-ebon-parser [--file] &lt;input_pdf_path&gt; [output_json_path]\nExample:\nrewe-ebon-parser examples/eBons/1.pdf\n\n\nParsing Multiple PDF Files in a Folder into JSON files\nrewe-ebon-parser [--folder] &lt;input_folder&gt; [output_folder] [--nthreads &lt;number_of_threads&gt;] \nExample:\nrewe-ebon-parser examples/eBons/\nExample (the module automatically detects if its a folder of PDFs or JSONs):\nrewe-ebon-parser examples/eBons/ --csv-table\nNote: the module will fail if the folder contains both JSON and PDF files to avoid duplicating the same data.\n\n\nCombine a Folder with Multiple JSON Files (previously extracted with the module) into a single CSV Table\nrewe-ebon-parser [--folder] &lt;input_folder&gt; [output_csv_path] [--combine-json] [--nthreads &lt;number_of_threads&gt;]\nExample (the module automatically detects if its a folder of PDFs or JSONs):\nrewe-ebon-parser examples/eBons/ --csv-table\nNote: the module will fail if the folder contains both JSON and PDF files to avoid duplicating the same data.\n\n\nOptional Arguments\n\n--file: Explicitly specify if the input and output paths are files.\n--folder: Explicitly specify if the input and output paths are folders.\n--nthreads: Number of concurrent threads to use for processing files.\n--txt-dump: Instead of parsing to JSON, this saves the raw extracted text from the PDF to a .txt file. Useful for debugging or inspection.\n--preserve-privacy: Anonymizes sensitive information (like addresses, payment details, and personal data) in the output. This works for both JSON and text dump modes.\n--rawtext-file: Output raw text extracted from the PDF files to .txt files (mostly for debugging).\n--rawtext-stdout: Print raw text extracted from the PDF files to the console (mostly for debugging).\n--csv-table: Output parsed data as a CSV table.\n--version: show module version.\n-h, --help: show help.\n\n\n\nCSV Table Columns\nWhen --csv-table is used, each row in the exported CSV contains: - datetime_local: Localized timestamp of the receipt. - market: REWE market identifier (store number). - marketStreet, marketZip, marketCity: Address of the market from marketAddress in the JSON output. - name, subTotal, amount, pricePerUnit, unit, taxCategory: Item-level data from the parsed receipt. - loyaltyProgramQualified: Name of the qualifying loyalty program for the item or empty if not qualified.\n\n\nAuto-detection Mode\nIf neither --file nor --folder is specified, the script will automatically detect if the input path is a file or a folder and process accordingly.\n\n\nOutput\n\nIf output_json_path is not specified for a single file, the output will be saved in the same directory as the input file with a .json extension.\nIf output_folder is not specified for a folder, a subfolder named rewe_json_out will be created in the input folder, and the output JSON files will be saved there.\nWhen using --rawtext-file with a folder, the output text files will be saved in a rewe_txt_out subfolder.\n\n\n\nLogging\nA detailed log of processing results will be saved in the output folder as processing_log.csv, containing information on which files were successfully processed and which failed, along with error messages if any.\n\n\n\nUse as a Python module in your own Python code\n\nDirect use on files\nfrom rewe_ebon_parser.parse import parse_pdf_ebon\n\nparse_pdf_ebon(\"examples/eBons/1.pdf\")\n\n\nPassing a data_buffer: bytes\nfrom rewe_ebon_parser.parse import parse_ebon\n\n# here the function is once again getting the data from a file,\n# but input can come from anywhere\ndef process_pdf(pdf_path):\n    with open(pdf_path, 'rb') as f:\n        data = f.read()\n        result = parse_ebon(data)\n        return result\n\nprocess_pdf(\"examples/eBons/1.pdf\")"
+  },
+  {
+    "objectID": "index.html#output-format",
+    "href": "index.html#output-format",
+    "title": "rewe-ebon-parser: Home",
+    "section": "Output Format",
+    "text": "Output Format\n\nNote: Breaking Changes\nTo support multiple loyalty programs, the JSON output format has been updated. These changes are breaking for users who rely on the old structure.\n\nThe parser now uses a generalized loyalty object instead of a hardcoded payback object.\n\nThe loyalty Object\nThe top-level payback key in the JSON output has been replaced by a loyalty key. This new object contains a program field (\"PAYBACK\" or \"REWE Bonus\") and a details field with the program-specific data.\nOld PAYBACK Format:\n{\n  \"payback\": {\n    \"card\": \"#########9334\",\n    \"earnedPoints\": 19\n  }\n}\nNew PAYBACK Format:\n{\n  \"loyalty\": {\n    \"program\": \"PAYBACK\",\n    \"details\": {\n      \"card\": \"#########9334\",\n      \"earnedPoints\": 19\n    }\n  }\n}\nNew REWE Bonus Format:\n{\n  \"loyalty\": {\n    \"program\": \"REWE Bonus\",\n    \"details\": {\n      \"earnedCredit\": 6.28,\n      \"newTotalCredit\": 7.26,\n      \"usedCoupons\": [\n        {\n          \"name\": \"10% auf REWE Bio\",\n          \"value\": 1.53\n        }\n      ]\n    }\n  }\n}\n\n\nThe items Object\nWithin each item, the boolean paybackQualified field has been replaced by a string field named loyaltyProgramQualified. This field will contain the name of the loyalty program (\"PAYBACK\" or \"REWE Bonus\") if the item qualifies, or it will be null if it does not.\nOld Item Format:\n{\n  \"name\": \"SALAMI SPITZENQ.\",\n  \"paybackQualified\": true\n}\nNew Item Format:\n{\n  \"name\": \"SALAMI SPITZENQ.\",\n  \"loyaltyProgramQualified\": \"PAYBACK\"\n}"
+  },
+  {
+    "objectID": "index.html#license",
+    "href": "index.html#license",
+    "title": "rewe-ebon-parser: Home",
+    "section": "License",
+    "text": "License\nThis project is licensed under the MIT License. For details, see the LICENSE file."
+  },
+  {
+    "objectID": "index.html#changelog",
+    "href": "index.html#changelog",
+    "title": "rewe-ebon-parser: Home",
+    "section": "Changelog",
+    "text": "Changelog\nFor a detailed history of changes, see the CHANGELOG.md file."
+  },
+  {
+    "objectID": "index.html#caveats",
+    "href": "index.html#caveats",
+    "title": "rewe-ebon-parser: Home",
+    "section": "Caveats",
+    "text": "Caveats\nWhile the parser is tested against several receipt formats, REWE occasionally updates the layout of their eBons. A new or unusual layout might cause parsing errors, especially in the loyalty program section."
+  },
+  {
+    "objectID": "index.html#future-work",
+    "href": "index.html#future-work",
+    "title": "rewe-ebon-parser: Home",
+    "section": "Future Work",
+    "text": "Future Work\n\nContinue to improve the robustness of coupon parsing for both loyalty programs.\nAdd handling for more edge cases and receipt variations as they are discovered."
+  },
+  {
+    "objectID": "CHANGELOG.html",
+    "href": "CHANGELOG.html",
+    "title": "Changelog",
+    "section": "",
+    "text": "All notable changes to this project will be documented in this file.\nThe format is based on Keep a Changelog, and this project adheres to Semantic Versioning.\n\n\n\n\n\nSupport for parsing the new REWE Bonus loyalty program, including earned credit and value-based coupons.\nNew test suite to validate REWE Bonus parsing logic.\nThe loyaltyProgramQualified column in CSV table exports now holds the loyalty program name (or is empty when the item is not qualified).\nCSV exports now include market, marketStreet, marketZip, and marketCity columns so each row carries its originating store information.\n\n\n\n\n\n[BREAKING CHANGE] The top-level payback key in the JSON output has been replaced by a generalized loyalty object. This new object specifies the program (“PAYBACK” or “REWE Bonus”) and contains the program-specific details.\n[BREAKING CHANGE] In the items list, the paybackQualified boolean field has been replaced with the loyaltyProgramQualified string field, which holds the name of the qualifying program or is null.\nRenamed internal data class PaybackData to PaybackDetails for clarity within the new loyalty model.\n\n\n\n\n\nImproved parser stability by pre-scanning for the loyalty program type before processing items, ensuring correct qualification labeling.\n\n\n\n\n\n\n\n\nAdd docs\n\n\n\n\n\n\n\n\nAdded --csv-table functionality to parse items from PDF or JSON files and save them into a single CSV table.\nAdded basic documentation in docstrings\nFix issues with parsing addresses from certain receipts.\n\n\n\n\n\n\n\n\nInitial release of the rewe-ebon-parser package."
+  },
+  {
+    "objectID": "CHANGELOG.html#unreleased",
+    "href": "CHANGELOG.html#unreleased",
+    "title": "Changelog",
+    "section": "",
+    "text": "Support for parsing the new REWE Bonus loyalty program, including earned credit and value-based coupons.\nNew test suite to validate REWE Bonus parsing logic.\nThe loyaltyProgramQualified column in CSV table exports now holds the loyalty program name (or is empty when the item is not qualified).\nCSV exports now include market, marketStreet, marketZip, and marketCity columns so each row carries its originating store information.\n\n\n\n\n\n[BREAKING CHANGE] The top-level payback key in the JSON output has been replaced by a generalized loyalty object. This new object specifies the program (“PAYBACK” or “REWE Bonus”) and contains the program-specific details.\n[BREAKING CHANGE] In the items list, the paybackQualified boolean field has been replaced with the loyaltyProgramQualified string field, which holds the name of the qualifying program or is null.\nRenamed internal data class PaybackData to PaybackDetails for clarity within the new loyalty model.\n\n\n\n\n\nImproved parser stability by pre-scanning for the loyalty program type before processing items, ensuring correct qualification labeling."
+  },
+  {
+    "objectID": "CHANGELOG.html#section",
+    "href": "CHANGELOG.html#section",
+    "title": "Changelog",
+    "section": "",
+    "text": "Add docs"
+  },
+  {
+    "objectID": "CHANGELOG.html#section-1",
+    "href": "CHANGELOG.html#section-1",
+    "title": "Changelog",
+    "section": "",
+    "text": "Added --csv-table functionality to parse items from PDF or JSON files and save them into a single CSV table.\nAdded basic documentation in docstrings\nFix issues with parsing addresses from certain receipts."
+  },
+  {
+    "objectID": "CHANGELOG.html#section-2",
+    "href": "CHANGELOG.html#section-2",
+    "title": "Changelog",
+    "section": "",
+    "text": "Initial release of the rewe-ebon-parser package."
+  },
+  {
+    "objectID": "reference/REWEBonusDetails.html",
+    "href": "reference/REWEBonusDetails.html",
+    "title": "REWEBonusDetails",
+    "section": "",
+    "text": "REWEBonusDetails\nREWEBonusDetails(earned_credit, used_credit, new_total_credit, used_coupons)\nHolds REWE Bonus loyalty data for a receipt.",
+    "crumbs": [
+      "API Reference",
+      "Data Classes",
+      "REWEBonusDetails"
+    ]
+  },
+  {
+    "objectID": "reference/LoyaltyData.html",
+    "href": "reference/LoyaltyData.html",
+    "title": "LoyaltyData",
+    "section": "",
+    "text": "LoyaltyData\nLoyaltyData(program, details)\nGeneric container describing which loyalty program is associated with the receipt.",
+    "crumbs": [
+      "API Reference",
+      "Data Classes",
+      "LoyaltyData"
+    ]
+  },
+  {
+    "objectID": "reference/TaxDetails.html",
+    "href": "reference/TaxDetails.html",
+    "title": "TaxDetails",
+    "section": "",
+    "text": "TaxDetails(total, A=None, B=None, C=None)\nRepresents tax details for a receipt.\nAttributes: total (TaxDetailsEntry): The total tax details entry. A (Optional[TaxDetailsEntry]): The tax details entry for category A. B (Optional[TaxDetailsEntry]): The tax details entry for category B. C (Optional[TaxDetailsEntry]): The tax details entry for category C.\n\n\n\n\n\nName\nDescription\n\n\n\n\nto_dict\nConverts the TaxDetails instance to a dictionary.\n\n\n\n\n\nTaxDetails.to_dict()\nConverts the TaxDetails instance to a dictionary.\nReturns: dict: A dictionary representation of the TaxDetails instance.",
+    "crumbs": [
+      "API Reference",
+      "Data Classes",
+      "TaxDetails"
+    ]
+  },
+  {
+    "objectID": "reference/TaxDetails.html#methods",
+    "href": "reference/TaxDetails.html#methods",
+    "title": "TaxDetails",
+    "section": "",
+    "text": "Name\nDescription\n\n\n\n\nto_dict\nConverts the TaxDetails instance to a dictionary.\n\n\n\n\n\nTaxDetails.to_dict()\nConverts the TaxDetails instance to a dictionary.\nReturns: dict: A dictionary representation of the TaxDetails instance.",
+    "crumbs": [
+      "API Reference",
+      "Data Classes",
+      "TaxDetails"
+    ]
+  },
+  {
+    "objectID": "reference/parse_ebon.html",
+    "href": "reference/parse_ebon.html",
+    "title": "parse_ebon",
+    "section": "",
+    "text": "parse_ebon\nparse_ebon(data_buffer)\nParse receipt data from a PDF data buffer.\nArgs: data_buffer (bytes): The PDF data buffer.\nReturns: dict: The parsed receipt data.",
+    "crumbs": [
+      "API Reference",
+      "Core Functions",
+      "parse_ebon"
+    ]
+  },
+  {
+    "objectID": "reference/Payment.html",
+    "href": "reference/Payment.html",
+    "title": "Payment",
+    "section": "",
+    "text": "Payment(type, value)\nRepresents a payment in a receipt.\nAttributes: type (str): The type of payment. value (float): The value of the payment.\n\n\n\n\n\nName\nDescription\n\n\n\n\nto_dict\nConverts the Payment instance to a dictionary.\n\n\n\n\n\nPayment.to_dict()\nConverts the Payment instance to a dictionary.\nReturns: dict: A dictionary representation of the Payment instance.",
+    "crumbs": [
+      "API Reference",
+      "Data Classes",
+      "Payment"
+    ]
+  },
+  {
+    "objectID": "reference/Payment.html#methods",
+    "href": "reference/Payment.html#methods",
+    "title": "Payment",
+    "section": "",
+    "text": "Name\nDescription\n\n\n\n\nto_dict\nConverts the Payment instance to a dictionary.\n\n\n\n\n\nPayment.to_dict()\nConverts the Payment instance to a dictionary.\nReturns: dict: A dictionary representation of the Payment instance.",
+    "crumbs": [
+      "API Reference",
+      "Data Classes",
+      "Payment"
+    ]
+  },
+  {
+    "objectID": "reference/Receipt.html",
+    "href": "reference/Receipt.html",
+    "title": "Receipt",
+    "section": "",
+    "text": "Receipt(\n    date,\n    market,\n    market_address,\n    cashier,\n    checkout,\n    vatin,\n    items,\n    total,\n    given,\n    change,\n    payout,\n    loyalty,\n    tax_details,\n)\nRepresents a receipt.\nAttributes: date (datetime): The date of the receipt. market (str): The market of the receipt. market_address (Optional[MarketAddress]): The market address. cashier (str): The cashier of the receipt. checkout (str): The checkout number. vatin (str): The VAT identification number. items (List[ReceiptItem]): The items in the receipt. total (float): The total amount of the receipt. given (List[Payment]): The given payments. change (Optional[float]): The change returned. payout (Optional[float]): The payout amount. loyalty (Optional[LoyaltyData]): Loyalty program data for the receipt. tax_details (TaxDetails): The tax details.\n\n\n\n\n\nName\nDescription\n\n\n\n\nto_dict\nConverts the Receipt instance to a dictionary.\n\n\n\n\n\nReceipt.to_dict()\nConverts the Receipt instance to a dictionary.\nReturns: dict: A dictionary representation of the Receipt instance.",
+    "crumbs": [
+      "API Reference",
+      "Data Classes",
+      "Receipt"
+    ]
+  },
+  {
+    "objectID": "reference/Receipt.html#methods",
+    "href": "reference/Receipt.html#methods",
+    "title": "Receipt",
+    "section": "",
+    "text": "Name\nDescription\n\n\n\n\nto_dict\nConverts the Receipt instance to a dictionary.\n\n\n\n\n\nReceipt.to_dict()\nConverts the Receipt instance to a dictionary.\nReturns: dict: A dictionary representation of the Receipt instance.",
+    "crumbs": [
+      "API Reference",
+      "Data Classes",
+      "Receipt"
+    ]
+  }
+]
