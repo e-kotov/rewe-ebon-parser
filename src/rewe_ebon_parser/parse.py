@@ -77,6 +77,16 @@ def parse_ebon(data_buffer: bytes) -> dict:
 
     lines = list(filter(None, map(str.strip, data_text.replace('  ', ' ').split('\n'))))
 
+    detected_loyalty_program = None
+    # Pre-scan for loyalty program so items can be labeled correctly
+    for line in lines:
+        if 'Deine REWE PAYBACK Vorteile' in line:
+            detected_loyalty_program = "PAYBACK"
+            break
+        if 'Deine REWE Bonus-Vorteile' in line:
+            detected_loyalty_program = "REWE Bonus"
+            break
+
     date = None
     market = '?'
     market_address = None
@@ -97,7 +107,6 @@ def parse_ebon(data_buffer: bytes) -> dict:
     rewe_bonus_used_credit = None
     rewe_bonus_new_total_credit = None
     rewe_bonus_coupons = []
-    detected_loyalty_program = None
     used_rewe_credit = float('nan')
     new_rewe_credit = float('nan')
     tax_details_total = TaxDetailsEntry(float('nan'), float('nan'), float('nan'), float('nan'))
@@ -189,14 +198,7 @@ def parse_ebon(data_buffer: bytes) -> dict:
         nonlocal payback_card_number, payback_points_before, payback_points, payback_revenue
         nonlocal tax_details_total, tax_details_A, tax_details_B, tax_details_C
         nonlocal used_rewe_credit, new_rewe_credit
-        nonlocal rewe_bonus_earned_credit, rewe_bonus_used_credit, rewe_bonus_new_total_credit, detected_loyalty_program
-
-        if 'Deine REWE PAYBACK Vorteile' in line:
-            detected_loyalty_program = "PAYBACK"
-            return True
-        if 'Deine REWE Bonus-Vorteile' in line:
-            detected_loyalty_program = "REWE Bonus"
-            return True
+        nonlocal rewe_bonus_earned_credit, rewe_bonus_used_credit, rewe_bonus_new_total_credit
 
         total_hit = re.match(r'SUMME EUR (-?\d*,\d\d)', line)
         if total_hit:
@@ -446,6 +448,16 @@ def parse_text_ebon(text: str) -> dict:
 
     lines = list(filter(None, map(str.strip, data_text.replace('  ', ' ').split('\n'))))
 
+    detected_loyalty_program = None
+    # Pre-scan for loyalty program so items can be labeled correctly
+    for line in lines:
+        if 'Deine REWE PAYBACK Vorteile' in line:
+            detected_loyalty_program = "PAYBACK"
+            break
+        if 'Deine REWE Bonus-Vorteile' in line:
+            detected_loyalty_program = "REWE Bonus"
+            break
+
     date = None
     market = '?'
     market_address = None
@@ -466,7 +478,6 @@ def parse_text_ebon(text: str) -> dict:
     rewe_bonus_used_credit = None
     rewe_bonus_new_total_credit = None
     rewe_bonus_coupons = []
-    detected_loyalty_program = None
     used_rewe_credit = float('nan')
     new_rewe_credit = float('nan')
     tax_details_total = TaxDetailsEntry(float('nan'), float('nan'), float('nan'), float('nan'))
@@ -557,14 +568,7 @@ def parse_text_ebon(text: str) -> dict:
         nonlocal payback_card_number, payback_points_before, payback_points, payback_revenue
         nonlocal tax_details_total, tax_details_A, tax_details_B, tax_details_C
         nonlocal used_rewe_credit, new_rewe_credit
-        nonlocal rewe_bonus_earned_credit, rewe_bonus_used_credit, rewe_bonus_new_total_credit, detected_loyalty_program
-
-        if 'Deine REWE PAYBACK Vorteile' in line:
-            detected_loyalty_program = "PAYBACK"
-            return True
-        if 'Deine REWE Bonus-Vorteile' in line:
-            detected_loyalty_program = "REWE Bonus"
-            return True
+        nonlocal rewe_bonus_earned_credit, rewe_bonus_used_credit, rewe_bonus_new_total_credit
 
         total_hit = re.match(r'SUMME EUR (-?\d*,\d\d)', line)
         if total_hit:

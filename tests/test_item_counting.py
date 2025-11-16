@@ -21,6 +21,8 @@ TXT_CASES = [
     ('2.txt', 'txt', 5), # test if fallback works when EUR and --- are missing
     ('3.txt', 'txt', 44),
     ('4.txt', 'txt', 8), # test special characters handling
+    ('5.txt', 'txt', 24), # test rewe bonus receipt 1
+    ('6.txt', 'txt', 8),  # test rewe bonus receipt 2
 ]
 
 # Combine all test cases for the parameterizer (gracefully handle undefined lists)
