@@ -4,7 +4,7 @@
 [![PyPI Downloads](https://static.pepy.tech/personalized-badge/rewe-ebon-parser?period=monthly&units=INTERNATIONAL_SYSTEM&left_color=BLACK&right_color=GREEN&left_text=monthly+downloads)](https://pepy.tech/projects/rewe-ebon-parser)
 [![License](https://img.shields.io/pypi/l/rewe-ebon-parser)](LICENSE)
 
-**Homepage**: [https://www.ekotov.pro/rewe-ebon-parser](https://www.ekotov.pro/rewe-ebon-parser)
+**Homepage and Documentation**: [https://www.ekotov.pro/rewe-ebon-parser](https://www.ekotov.pro/rewe-ebon-parser)
 **PyPI**: [https://pypi.org/project/rewe-ebon-parser/](https://pypi.org/project/rewe-ebon-parser/)  
 **Changelog**: [View Full Changelog](CHANGELOG.md)  
 **Releases**: [View Release History on GitHub](https://github.com/e-kotov/rewe-ebon-parser/releases)
