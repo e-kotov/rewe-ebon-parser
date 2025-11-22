@@ -227,6 +227,13 @@
     "text": "Future Work\n\nContinue to improve the robustness of coupon parsing for both loyalty programs.\nAdd handling for more edge cases and receipt variations as they are discovered."
   },
   {
+    "objectID": "index.html#contributors",
+    "href": "index.html#contributors",
+    "title": "rewe-ebon-parser: Home",
+    "section": "Contributors",
+    "text": "Contributors\n\n\n\n\n\n\n\ntomek272💻 🐛\n\n\nbrain0100power🐛\n\n\nFelix Jung💻\n\n\n\n\n\n\n Add your contributions"
+  },
+  {
     "objectID": "CHANGELOG.html",
     "href": "CHANGELOG.html",
     "title": "Changelog",
