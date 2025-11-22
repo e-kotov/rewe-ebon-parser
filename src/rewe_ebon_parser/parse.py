@@ -60,7 +60,7 @@ def extract_raw_text(data_buffer: bytes) -> str:
     raw_text = ''
     with pdfplumber.open(io.BytesIO(data_buffer)) as pdf:
         for page in pdf.pages:
-            raw_text += page.extract_text()
+            raw_text += page.extract_text() + '\n'
     return raw_text
 
 def parse_ebon(data_buffer: bytes) -> dict:
