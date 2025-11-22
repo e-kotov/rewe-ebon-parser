@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.8] - 2025-11-22
+
 ### Added
 - Support for parsing the new **REWE Bonus** loyalty program, including earned credit and value-based coupons.
 - New test suite to validate REWE Bonus parsing logic.
