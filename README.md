@@ -275,3 +275,32 @@ While the parser is tested against several receipt formats, REWE occasionally up
 
 - Continue to improve the robustness of coupon parsing for both loyalty programs.
 - Add handling for more edge cases and receipt variations as they are discovered.
+
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/tomek272"><img src="https://avatars.githubusercontent.com/u/58133525?v=4?s=100" width="100px;" alt="tomek272"/><br /><sub><b>tomek272</b></sub></a><br /><a href="https://github.com/e-kotov/rewe-ebon-parser/commits?author=tomek272" title="Code">💻</a> <a href="https://github.com/e-kotov/rewe-ebon-parser/issues?q=author%3Atomek272" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/brain0100power"><img src="https://avatars.githubusercontent.com/u/82723855?v=4?s=100" width="100px;" alt="brain0100power"/><br /><sub><b>brain0100power</b></sub></a><br /><a href="https://github.com/e-kotov/rewe-ebon-parser/issues?q=author%3Abrain0100power" title="Bug reports">🐛</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://fjung.com/"><img src="https://avatars.githubusercontent.com/u/708779?v=4?s=100" width="100px;" alt="Felix Jung"/><br /><sub><b>Felix Jung</b></sub></a><br /><a href="https://github.com/e-kotov/rewe-ebon-parser/commits?author=fxjung" title="Code">💻</a></td>
+    </tr>
+  </tbody>
+  <tfoot>
+    <tr>
+      <td align="center" size="13px" colspan="7">
+        <img src="https://raw.githubusercontent.com/all-contributors/all-contributors-cli/1b8533af435da9854653492b1327a23a4dbd0a10/assets/logo-small.svg">
+          <a href="https://all-contributors.js.org/docs/en/bot/usage">Add your contributions</a>
+        </img>
+      </td>
+    </tr>
+  </tfoot>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->

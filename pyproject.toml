@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "rewe-ebon-parser"
-version = "0.0.7"
+version = "0.0.8"
 authors = [
   { name="Egor Kotov", email="kotov.egor@gmail.com" },
 ]
