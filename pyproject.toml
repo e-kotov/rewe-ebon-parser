@@ -33,7 +33,9 @@ dev = [
 ]
 
 docs = [
-    "quartodoc"
+    "quartodoc",
+    # quartodoc passes docstring options that Griffe 2.x no longer supports.
+    "griffe<2",
 ]
 
 [project.scripts]
