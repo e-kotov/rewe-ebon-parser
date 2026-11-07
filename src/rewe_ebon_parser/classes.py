@@ -333,14 +333,15 @@ class Receipt:
         checkout (str): The checkout number.
         vatin (str): The VAT identification number.
         items (List[ReceiptItem]): The items in the receipt.
-        total (float): The total amount of the receipt.
+        total (float): The total amount paid, including any optional donation.
+        donation (Optional[float]): Optional 'Stimmt so!' donation, not part of items.
         given (List[Payment]): The given payments.
         change (Optional[float]): The change returned.
         payout (Optional[float]): The payout amount.
         loyalty (Optional[LoyaltyData]): Loyalty program data for the receipt.
         tax_details (TaxDetails): The tax details.
     """
-    def __init__(self, date: datetime, market: str, market_address: Optional[MarketAddress], cashier: str, checkout: str, vatin: str, items: List[ReceiptItem], total: float, given: List[Payment], change: Optional[float], payout: Optional[float], loyalty: Optional[LoyaltyData], tax_details: TaxDetails):
+    def __init__(self, date: datetime, market: str, market_address: Optional[MarketAddress], cashier: str, checkout: str, vatin: str, items: List[ReceiptItem], total: float, given: List[Payment], change: Optional[float], payout: Optional[float], loyalty: Optional[LoyaltyData], tax_details: TaxDetails, donation: Optional[float] = None):
         self.date = date
         self.market = market
         self.market_address = market_address
@@ -354,6 +355,7 @@ class Receipt:
         self.payout = payout
         self.loyalty = loyalty
         self.tax_details = tax_details
+        self.donation = donation
     
     def to_dict(self):
         """
@@ -375,6 +377,8 @@ class Receipt:
             'given': [payment.to_dict() for payment in self.given],
             'taxDetails': self.tax_details.to_dict()
         }
+        if self.donation is not None:
+            data['donation'] = self.donation
         if self.change is not None:
             data['change'] = self.change
         if self.loyalty is not None:
