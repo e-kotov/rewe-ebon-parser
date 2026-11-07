@@ -230,8 +230,11 @@ def parse_ebon(data_buffer: bytes) -> dict:
             total = float(total_hit.group(1).replace(',', '.'))
             return True
 
-        donation_hit = re.search(r'Stimmt so!\s+(-?\d*,\d{2})(?!\d)', line)
+        # Only an exact "Stimmt so!" line denotes a donation.
+        donation_hit = re.fullmatch(r'Stimmt so!\s+(-?\d*,\d{2})', line)
         if donation_hit:
+            if donation is not None:
+                raise ValueError("Duplicate 'Stimmt so!' donation line in the eBon")
             donation = float(donation_hit.group(1).replace(',', '.'))
             return True
 
@@ -635,8 +638,11 @@ def parse_text_ebon(text: str) -> dict:
             total = float(total_hit.group(1).replace(',', '.'))
             return True
 
-        donation_hit = re.search(r'Stimmt so!\s+(-?\d*,\d{2})(?!\d)', line)
+        # Only an exact "Stimmt so!" line denotes a donation.
+        donation_hit = re.fullmatch(r'Stimmt so!\s+(-?\d*,\d{2})', line)
         if donation_hit:
+            if donation is not None:
+                raise ValueError("Duplicate 'Stimmt so!' donation line in the eBon")
             donation = float(donation_hit.group(1).replace(',', '.'))
             return True
 

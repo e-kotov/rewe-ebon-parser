@@ -74,3 +74,39 @@ def test_donation_with_fallback_item_detection(parse_receipt):
     )
     assert receipt["donation"] == pytest.approx(0.05)
     assert len(receipt["items"]) == 2
+
+
+@pytest.mark.parametrize(
+    "invalid_line",
+    [
+        "Nicht Stimmt so! 0,05",
+        "Stimmt so! 0,05abc",
+        "Stimmt so! 0,05 EUR",
+        "Stimmt so! 0,051",
+    ],
+)
+def test_unrelated_or_malformed_donation_line_is_ignored(
+    parse_receipt, invalid_line
+):
+    # An unrelated or malformed line must never be counted as a donation.
+    receipt = parse_receipt(receipt_text("4,29", invalid_line))
+    assert "donation" not in receipt
+    assert receipt["total"] == pytest.approx(4.29)
+
+    # It also must not hide a genuine mismatch in the receipt totals.
+    with pytest.raises(ValueError, match="The eBon states a total sum"):
+        parse_receipt(receipt_text("4,34", invalid_line))
+
+
+@pytest.mark.parametrize(
+    "donation_lines",
+    [
+        ["Stimmt so! 0,10", "Stimmt so! 0,05"],
+        ["Stimmt so! 0,05", "Stimmt so! 0,05"],
+        ["Stimmt so! 0,00", "Stimmt so! 0,05"],
+    ],
+)
+def test_duplicate_donation_lines_are_rejected(parse_receipt, donation_lines):
+    # The parser must not silently overwrite the first donation value.
+    with pytest.raises(ValueError, match="Duplicate 'Stimmt so!' donation"):
+        parse_receipt(receipt_text("4,34", "\n".join(donation_lines)))
