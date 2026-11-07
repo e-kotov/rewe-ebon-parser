@@ -95,6 +95,7 @@ def parse_ebon(data_buffer: bytes) -> dict:
     uid = '?'
     items = []
     total = float('nan')
+    donation = None
     given = []
     change = float('nan')
     payout = float('nan')
@@ -218,7 +219,7 @@ def parse_ebon(data_buffer: bytes) -> dict:
         return processed_item
 
     def _process_non_item_line(line: str) -> bool:
-        nonlocal total, change, payout, date, market, checkout, cashier, uid
+        nonlocal total, donation, change, payout, date, market, checkout, cashier, uid
         nonlocal payback_card_number, payback_points_before, payback_points, payback_revenue
         nonlocal tax_details_total, tax_details_A, tax_details_B, tax_details_C
         nonlocal used_rewe_credit, new_rewe_credit
@@ -227,6 +228,14 @@ def parse_ebon(data_buffer: bytes) -> dict:
         total_hit = re.match(r'SUMME EUR (-?\d*,\d\d)', line)
         if total_hit:
             total = float(total_hit.group(1).replace(',', '.'))
+            return True
+
+        # Only an exact "Stimmt so!" line denotes a donation.
+        donation_hit = re.fullmatch(r'Stimmt so!\s+(-?\d*,\d{2})', line)
+        if donation_hit:
+            if donation is not None:
+                raise ValueError("Duplicate 'Stimmt so!' donation line in the eBon")
+            donation = float(donation_hit.group(1).replace(',', '.'))
             return True
 
         gegeben_hit = re.match(r'Geg\.(.*) EUR ([0-9,]*)', line)
@@ -387,6 +396,9 @@ def parse_ebon(data_buffer: bytes) -> dict:
 
     real_total_in_cents = sum(item.sub_total * 100 for item in items)
     total_in_cents = total * 100
+    # The optional 'Stimmt so!' donation is paid but is not a purchased item.
+    if donation is not None and donation > 0:
+        total_in_cents -= donation * 100
 
     if round(real_total_in_cents, 2) != round(total_in_cents, 2):
         raise ValueError(f"Something went wrong when parsing the eBon: The eBon states a total sum of {total_in_cents} but the parser only found items worth {real_total_in_cents}.")
@@ -422,6 +434,7 @@ def parse_ebon(data_buffer: bytes) -> dict:
         vatin=uid,
         items=items,
         total=total,
+        donation=donation,
         given=given,
         change=change if not math.isnan(change) else None,
         payout=payout if not math.isnan(payout) else None,
@@ -446,6 +459,7 @@ def parse_ebon(data_buffer: bytes) -> dict:
         ('vatin', receipt_dict.get('vatin')),
         ('items', receipt_dict.get('items')),
         ('total', receipt_dict.get('total')),
+        ('donation', receipt_dict.get('donation')),
         ('given', receipt_dict.get('given')),
         ('change', receipt_dict.get('change')),
         ('payout', receipt_dict.get('payout')),
@@ -490,6 +504,7 @@ def parse_text_ebon(text: str) -> dict:
     uid = '?'
     items = []
     total = float('nan')
+    donation = None
     given = []
     change = float('nan')
     payout = float('nan')
@@ -612,7 +627,7 @@ def parse_text_ebon(text: str) -> dict:
         return processed_item
 
     def _process_non_item_line(line: str) -> bool:
-        nonlocal total, change, payout, date, market, checkout, cashier, uid
+        nonlocal total, donation, change, payout, date, market, checkout, cashier, uid
         nonlocal payback_card_number, payback_points_before, payback_points, payback_revenue
         nonlocal tax_details_total, tax_details_A, tax_details_B, tax_details_C
         nonlocal used_rewe_credit, new_rewe_credit
@@ -621,6 +636,14 @@ def parse_text_ebon(text: str) -> dict:
         total_hit = re.match(r'SUMME EUR (-?\d*,\d\d)', line)
         if total_hit:
             total = float(total_hit.group(1).replace(',', '.'))
+            return True
+
+        # Only an exact "Stimmt so!" line denotes a donation.
+        donation_hit = re.fullmatch(r'Stimmt so!\s+(-?\d*,\d{2})', line)
+        if donation_hit:
+            if donation is not None:
+                raise ValueError("Duplicate 'Stimmt so!' donation line in the eBon")
+            donation = float(donation_hit.group(1).replace(',', '.'))
             return True
 
         gegeben_hit = re.match(r'Geg\.(.*) EUR ([0-9,]*)', line)
@@ -785,6 +808,9 @@ def parse_text_ebon(text: str) -> dict:
 
     real_total_in_cents = sum(item.sub_total * 100 for item in items)
     total_in_cents = total * 100
+    # The optional 'Stimmt so!' donation is paid but is not a purchased item.
+    if donation is not None and donation > 0:
+        total_in_cents -= donation * 100
 
     # For anonymized files, skip total validation if it's off (might have redacted items)
     # Validate that the sum of item sub_totals equals the receipt's total sum.
@@ -822,6 +848,7 @@ def parse_text_ebon(text: str) -> dict:
         vatin=uid,
         items=items,
         total=total,
+        donation=donation,
         given=given,
         change=change if not math.isnan(change) else None,
         payout=payout if not math.isnan(payout) else None,
@@ -846,6 +873,7 @@ def parse_text_ebon(text: str) -> dict:
         ('vatin', receipt_dict.get('vatin')),
         ('items', receipt_dict.get('items')),
         ('total', receipt_dict.get('total')),
+        ('donation', receipt_dict.get('donation')),
         ('given', receipt_dict.get('given')),
         ('change', receipt_dict.get('change')),
         ('payout', receipt_dict.get('payout')),

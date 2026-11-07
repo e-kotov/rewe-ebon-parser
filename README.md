@@ -21,6 +21,7 @@ The REWE eBon Parser is a Python package designed to parse REWE eBons (receipts)
 - Concurrent processing of multiple PDF files with adjustable threading.
 - Detailed logging of processing results in CSV format.
 - Supports both PAYBACK and the new REWE Bonus loyalty programs.
+- Recognizes optional `Stimmt so!` donations in compatible PENNY eBons without counting them as purchased items.
 
 ## Installation
 
@@ -179,6 +180,8 @@ process_pdf("examples/eBons/1.pdf")
 ```
 
 ## Output Format
+
+When a receipt includes a `Stimmt so!` donation, its JSON contains a `donation` amount. The `total` remains the full amount paid, while `items` contains only purchased products. Receipts without a donation line do not gain a `donation` field. This adds compatibility with PENNY receipts that otherwise follow the supported layout; other PENNY variants have not been verified.
 
 > **Note: Breaking Changes**
 >

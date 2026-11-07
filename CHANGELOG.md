@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Recognize optional `Stimmt so!` donations on compatible PENNY eBons, preserving the amount paid and excluding donations from purchased-item total validation.
+
 ## [0.0.8] - 2025-11-22
 
 ### Added
