@@ -7,8 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.9] - 2026-11-07
+
 ### Added
-- Recognize optional `Stimmt so!` donations on compatible PENNY eBons, preserving the amount paid and excluding donations from purchased-item total validation.
+- Support optional PENNY `Stimmt so!` donations for compatible eBon layouts. Donations are reported separately and excluded from the purchased-items total check while `total` retains the full payment amount ([#14](https://github.com/e-kotov/rewe-ebon-parser/pull/14)).
+- Regression tests covering standard and donation receipts, both parsing entry points, malformed donation lines, and duplicates ([#14](https://github.com/e-kotov/rewe-ebon-parser/pull/14)).
+
+### Fixed
+- Prevent unrelated or malformed donation text from being interpreted as a donation, and reject duplicate donation lines instead of silently overwriting them ([#14](https://github.com/e-kotov/rewe-ebon-parser/pull/14)).
+- Restore Python 3.9 testing on Ubuntu 24.04 and update `actions/setup-python` to v5 ([#15](https://github.com/e-kotov/rewe-ebon-parser/pull/15)).
+- Restore API documentation builds by constraining `griffe<2` in the documentation extra ([#15](https://github.com/e-kotov/rewe-ebon-parser/pull/15)).
+
+### Limitations
+- PENNY donation parsing has been validated with synthetic fixtures; it has not yet been validated against a genuine PENNY donation PDF.
 
 ## [0.0.8] - 2025-11-22
 
