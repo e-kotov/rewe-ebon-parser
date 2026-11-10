@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Require Python 3.11 or newer so the lockfile no longer retains vulnerable dependency versions needed by Python 3.9/3.10.
+
+### Security
+- Refresh the locked PDF parsing and tooling dependencies, including Pillow, cryptography, urllib3, requests, certifi, filelock, virtualenv, Pygments, pytest, idna and Black.
+
 ## [0.0.9] - 2026-11-07
 
 ### Added

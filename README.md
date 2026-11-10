@@ -25,6 +25,9 @@ The REWE eBon Parser is a Python package designed to parse REWE eBons (receipts)
 
 ## Installation
 
+Python 3.11 or newer is required. Older releases support Python 3.9/3.10,
+but do not include the current dependency security updates.
+
 You can install the package using pip:
 
 ```bash
