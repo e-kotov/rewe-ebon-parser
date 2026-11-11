@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 - Refresh the locked PDF parsing and tooling dependencies, including Pillow, cryptography, urllib3, requests, certifi, filelock, virtualenv, Pygments, pytest, idna and Black.
 
+### Fixed
+- Update the PyPI publishing action to support package metadata version 2.5.
+- Synchronize the module and command-line version with the 0.1.0 release.
+
 ## [0.0.9] - 2026-11-07
 
 ### Added

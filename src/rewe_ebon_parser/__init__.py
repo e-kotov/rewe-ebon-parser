@@ -1,6 +1,6 @@
 # src/rewe_ebon_parser/__init__.py
 
-__version__ = "0.0.9"
+__version__ = "0.1.0"
 
 from .classes import (
     LoyaltyData,
