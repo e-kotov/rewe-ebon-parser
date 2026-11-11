@@ -7,7 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
+## [0.1.0] - 2026-11-11
+
+### Breaking changes
 - Require Python 3.11 or newer so the lockfile no longer retains vulnerable dependency versions needed by Python 3.9/3.10.
 
 ### Security
