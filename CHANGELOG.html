@@ -166,6 +166,13 @@ ul.task-list li input[type="checkbox"] {
 <li>Refresh the locked PDF parsing and tooling dependencies, including Pillow, cryptography, urllib3, requests, certifi, filelock, virtualenv, Pygments, pytest, idna and Black.</li>
 </ul>
 </section>
+<section id="fixed" class="level3">
+<h3 class="anchored" data-anchor-id="fixed">Fixed</h3>
+<ul>
+<li>Update the PyPI publishing action to support package metadata version 2.5.</li>
+<li>Synchronize the module and command-line version with the 0.1.0 release.</li>
+</ul>
+</section>
 </section>
 <section id="section-1" class="level2">
 <h2 class="anchored" data-anchor-id="section-1">[0.0.9] - 2026-11-07</h2>
@@ -176,8 +183,8 @@ ul.task-list li input[type="checkbox"] {
 <li>Regression tests covering standard and donation receipts, both parsing entry points, malformed donation lines, and duplicates (<a href="https://github.com/e-kotov/rewe-ebon-parser/pull/14">#14</a>).</li>
 </ul>
 </section>
-<section id="fixed" class="level3">
-<h3 class="anchored" data-anchor-id="fixed">Fixed</h3>
+<section id="fixed-1" class="level3">
+<h3 class="anchored" data-anchor-id="fixed-1">Fixed</h3>
 <ul>
 <li>Prevent unrelated or malformed donation text from being interpreted as a donation, and reject duplicate donation lines instead of silently overwriting them (<a href="https://github.com/e-kotov/rewe-ebon-parser/pull/14">#14</a>).</li>
 <li>Restore Python 3.9 testing on Ubuntu 24.04 and update <code>actions/setup-python</code> to v5 (<a href="https://github.com/e-kotov/rewe-ebon-parser/pull/15">#15</a>).</li>
@@ -210,8 +217,8 @@ ul.task-list li input[type="checkbox"] {
 <li>Renamed internal data class <code>PaybackData</code> to <code>PaybackDetails</code> for clarity within the new loyalty model.</li>
 </ul>
 </section>
-<section id="fixed-1" class="level3">
-<h3 class="anchored" data-anchor-id="fixed-1">Fixed</h3>
+<section id="fixed-2" class="level3">
+<h3 class="anchored" data-anchor-id="fixed-2">Fixed</h3>
 <ul>
 <li>Improved parser stability by pre-scanning for the loyalty program type before processing items, ensuring correct qualification labeling.</li>
 </ul>
