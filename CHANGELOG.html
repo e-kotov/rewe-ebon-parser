@@ -151,6 +151,18 @@ ul.task-list li input[type="checkbox"] {
 <p>The format is based on <a href="https://keepachangelog.com/en/1.0.0/">Keep a Changelog</a>, and this project adheres to <a href="https://semver.org/spec/v2.0.0.html">Semantic Versioning</a>.</p>
 <section id="unreleased" class="level2">
 <h2 class="anchored" data-anchor-id="unreleased">[Unreleased]</h2>
+<section id="changed" class="level3">
+<h3 class="anchored" data-anchor-id="changed">Changed</h3>
+<ul>
+<li>Require Python 3.11 or newer so the lockfile no longer retains vulnerable dependency versions needed by Python 3.9/3.10.</li>
+</ul>
+</section>
+<section id="security" class="level3">
+<h3 class="anchored" data-anchor-id="security">Security</h3>
+<ul>
+<li>Refresh the locked PDF parsing and tooling dependencies, including Pillow, cryptography, urllib3, requests, certifi, filelock, virtualenv, Pygments, pytest, idna and Black.</li>
+</ul>
+</section>
 </section>
 <section id="section" class="level2">
 <h2 class="anchored" data-anchor-id="section">[0.0.9] - 2026-11-07</h2>
@@ -187,8 +199,8 @@ ul.task-list li input[type="checkbox"] {
 <li>CSV exports now include <code>market</code>, <code>marketStreet</code>, <code>marketZip</code>, and <code>marketCity</code> columns so each row carries its originating store information.</li>
 </ul>
 </section>
-<section id="changed" class="level3">
-<h3 class="anchored" data-anchor-id="changed">Changed</h3>
+<section id="changed-1" class="level3">
+<h3 class="anchored" data-anchor-id="changed-1">Changed</h3>
 <ul>
 <li><strong>[BREAKING CHANGE]</strong> The top-level <code>payback</code> key in the JSON output has been replaced by a generalized <code>loyalty</code> object. This new object specifies the <code>program</code> (“PAYBACK” or “REWE Bonus”) and contains the program-specific <code>details</code>.</li>
 <li><strong>[BREAKING CHANGE]</strong> In the <code>items</code> list, the <code>paybackQualified</code> boolean field has been replaced with the <code>loyaltyProgramQualified</code> string field, which holds the name of the qualifying program or is <code>null</code>.</li>
